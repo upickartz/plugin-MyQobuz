@@ -1,0 +1,93 @@
+# String file for MyQobuz plugin
+
+PLUGIN_MY_QOBUZ
+	DE	MeinQobuz 
+	EN	MyQobuz
+
+PLUGIN_MY_QOBUZ_QOBUZ_MISSING
+	DE	Qobuz ist nicht installiert. Bitte auf der Settings Seite installieren. 
+	EN	Qobuz is not installed. Please install on the Settings page.
+
+PLUGIN_ON_MY_QOBUZ
+	DE	Auf MeinQobuz 
+	EN	On MyQobuz
+
+PLUGIN_MY_QOBUZ_GENRE
+	DE	Meine Stilrichtungen
+	EN	My Genres
+
+PLUGIN_MY_QOBUZ_ARTIST
+	DE	Meine Künstler
+	EN	My Artists
+	
+PLUGIN_MY_QOBUZ_ALBUM
+	DE	Mein Qobuz: '%s' 
+	EN	My Qobuz: '%s'
+
+PLUGIN_QOBUZ_ADD_TO_MY_QOBUZ
+	DE	'%s' zu 'Mein Qobuz' hinzufügen
+	EN	'%s' add to 'My Qobuz'
+
+PLUGIN_QOBUZ_ADDED_TO_MY_QOBUZ
+	DE	'%s' zu 'Mein Qobuz' hinzugefügt
+	EN	'%s' added to 'My Qobuz'
+
+PLUGIN_QOBUZ_REMOVE_FROM_MY_QOBUZ
+	DE	'%s' von 'Mein Qobuz' entfernen
+	EN	'%s' remove from 'My Qobuz'
+
+PLUGIN_QOBUZ_REMOVED_FROM_MY_QOBUZ
+	DE	'%s' von 'Mein Qobuz' entfernt
+	EN	'%s' removed from 'My Qobuz'
+
+PLUGIN_QOBUZ_REMOVE_TAG_FROM_MY_QOBUZ
+	DE	Tag '%s' von '%s' entfernen
+	EN	Tag '%s' remove from '%s'
+	
+PLUGIN_QOBUZ_REMOVED_TAG_FROM_MY_QOBUZ
+	DE	Tag '%s'  entfernt
+	EN	Tag '%s'  removed
+	
+PLUGIN_MY_QOBUZ_CHANGE_GENRE
+	DE	Stilrichtung ändern ...
+	EN	Change Genre ...
+
+PLUGIN_MY_QOBUZ_CHANGED_GENRE
+	DE	Stilrichtung geänder nach '%s'
+	EN	Changed Genre to '%s'
+
+PLUGIN_MY_QOBUZ_ADD_TAG
+	DE	Tag hinzufügen ...
+	EN	Add Tag ...
+
+PLUGIN_MY_QOBUZ_TAG_ADDED
+	DE	Tag '%s' hinzugefügt
+	EN	Tag '%s' added
+
+PLUGIN_MY_QOBUZ_SELECT_TAG
+	DE	Meine Tags
+	EN	My Tags
+
+PLUGIN_MY_QOBUZ_DELETED_ALBUMS
+	DE	Von Qobuz gelöschte Alben
+	EN	Qobuz removed albums
+
+PLUGIN_MY_QOBUZ_DELETED_ALBUM
+	DE	Gelöscht: '%s'
+	EN	Removed: '%s'
+
+PLUGIN_MY_QOBUZ_LATEST_ALBUM
+	DE	Zuletzt importiert
+	EN	Last imported
+
+PLUGIN_MY_QOBUZ_DESC
+	DE	Definition einer eigenen Sicht 'MeinQobuz' auf Qobuz auf Albumebene (Hinzufügen und Entfernen von Alben). Tags können vergeben werden. um weitere Sichten zu definieren. 
+	EN	To define an own view 'MyQobuz' on Qobuz based on complete albums (add and remove album). You can provide tags for subviews.
+
+PLUGIN_SETTINGS_MY_QOBUZ_DB
+	DE	Datenbank von 'Mein Qobuz'. 
+	EN	Database of 'MyQobuz'.
+
+PLUGIN_SETTINGS_MY_QOBUZ_DB_DESC
+	DE	Falls leer wird die DB MyQobuz.db in Verzeichnis 'Cache' gespeichert. Sonst muss ein gültiges Verzeichnis angegeben werden und/oder ein DB name. 
+	EN	If empty, default location in folder 'Cache' will be used for MyQobuz.db. Otherwise a valid directory path must be provided and/or a filename for the DB.

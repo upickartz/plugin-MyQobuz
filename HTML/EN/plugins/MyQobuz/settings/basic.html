@@ -1,0 +1,18 @@
+
+[% PROCESS settings/header.html %]
+
+	[% WRAPPER settingSection %]
+		
+		[% WRAPPER settingGroup title="PLUGIN_MY_QOBUZ" desc="" %]
+			<input type="checkbox" [% IF prefs.pref_enableMyQobuz %]checked[% END %] class="stdedit" name="pref_enableMyQobuz" id="pref_enableMyQobuz" value="1" />
+			<label for="pref_enableMyQobuz" class="stdlabel">[% "PLUGIN_SETTINGS_MY_QOBUZ_DESC" | string %]</label>
+		[% END %]
+		[% IF prefs.pref_enableMyQobuz %]
+			[% WRAPPER settingGroup title="PLUGIN_SETTINGS_MY_QOBUZ_DB" desc="PLUGIN_SETTINGS_MY_QOBUZ_DB_DESC" %]
+			<input type="text" class="stdedit" name="pref_myQobuzDB" id="pref_myQobuzDB" value="[% prefs.myQobuzDB %]" size="90" />
+			[% END %]
+		[% END %]
+		
+	[% END %]
+
+[% PROCESS settings/footer.html %]
