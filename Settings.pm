@@ -36,7 +36,7 @@ sub checkMyQobuzConfig {
 			$log->error("Hugo checkMyQobuzConfig  oldDB: $oldQobuzDbName ; newDB: $newQobuzDbName .");
 			if ( defined $oldQobuzDbName  and ($newQobuzDbName ne $oldQobuzDbName) ) {
 				# Trigger restart required message
-				Plugins::Qobuz::MyQobuzDB->resetDB();
+				Plugins::MyQobuz::MyQobuzDB->resetDB();
 				$params = Slim::Web::Settings::Server::Plugins->getRestartMessage($params, Slim::Utils::Strings::string('CLEANUP_PLEASE_RESTART_SC'));
 			}
 		}
@@ -51,9 +51,7 @@ sub handler {
 	if (  $params->{saveSettings} ) {
 		$params->{'pref_enableDBConfig'} ||= 0;
 		$params->{'pref_myQobuzDB'} ||= "MyQobuz";
-
-		checkMyQobuzConfig($params);
-		
+		checkMyQobuzConfig($params);		
 	}
 
 	$class->SUPER::handler($client, $params);
