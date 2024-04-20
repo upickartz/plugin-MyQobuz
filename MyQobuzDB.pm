@@ -409,6 +409,7 @@ sub getInstance {
 
 sub resetDB {
     if (defined $instance) {
+        my $rc = $_dbh->disconnect  || warn $_dbh->errstr;
         $instance = undef;
     }
 }

@@ -25,19 +25,19 @@ PLUGIN_MY_QOBUZ_ALBUM
 	EN	My Qobuz: '%s'
 
 PLUGIN_QOBUZ_ADD_TO_MY_QOBUZ
-	DE	'%s' zu 'Mein Qobuz' hinzufügen
+	DE	'%s' zu 'MeinQobuz' hinzufügen
 	EN	'%s' add to 'My Qobuz'
 
 PLUGIN_QOBUZ_ADDED_TO_MY_QOBUZ
-	DE	'%s' zu 'Mein Qobuz' hinzugefügt
+	DE	'%s' zu 'MeinQobuz' hinzugefügt
 	EN	'%s' added to 'My Qobuz'
 
 PLUGIN_QOBUZ_REMOVE_FROM_MY_QOBUZ
-	DE	'%s' von 'Mein Qobuz' entfernen
+	DE	'%s' von 'MeinQobuz' entfernen
 	EN	'%s' remove from 'My Qobuz'
 
 PLUGIN_QOBUZ_REMOVED_FROM_MY_QOBUZ
-	DE	'%s' von 'Mein Qobuz' entfernt
+	DE	'%s' von 'MeinQobuz' entfernt
 	EN	'%s' removed from 'My Qobuz'
 
 PLUGIN_QOBUZ_REMOVE_TAG_FROM_MY_QOBUZ
@@ -85,9 +85,13 @@ PLUGIN_MY_QOBUZ_DESC
 	EN	To define an own view 'MyQobuz' on Qobuz based on complete albums (add and remove album). You can provide tags for subviews.
 
 PLUGIN_SETTINGS_MY_QOBUZ_DB
-	DE	Datenbank von 'Mein Qobuz'. 
+	DE	Datenbank von 'MeinQobuz'. 
 	EN	Database of 'MyQobuz'.
 
 PLUGIN_SETTINGS_MY_QOBUZ_DB_DESC
 	DE	Falls leer wird die DB MyQobuz.db in Verzeichnis 'Cache' gespeichert. Sonst muss ein gültiges Verzeichnis angegeben werden und/oder ein DB name. 
 	EN	If empty, default location in folder 'Cache' will be used for MyQobuz.db. Otherwise a valid directory path must be provided and/or a filename for the DB.
+
+PLUGIN_SETTINGS_MY_QOBUZ_DB_CFG
+	DE	Datenbank von 'MeinQobuz' konfigurirbar machen. 
+	EN	Make 'MyQobuz' database configurable.

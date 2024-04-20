@@ -17,7 +17,7 @@ my $qobuz_installed = 0;
 
 
 $prefs->init({
-	enableMyQobuz => 1,
+	enableDBConfig => 0,
 	myQobuzDB => "MyQobuz.db",
 });
 
@@ -34,7 +34,9 @@ use constant CAN_IMAGEPROXY => (Slim::Utils::Versions->compareVersions($::VERSIO
 
 sub initPlugin {
 	my $class = shift;
-
+	#DEBUG
+ 	my $dbConfig = $prefs->enableDBConfig;
+	$log->error("Hugo initPlugin  dbConfig: $dbConfig ");
 	# "Local Artwork" requires LMS 7.8+, as it's using its imageproxy.
 	if (CAN_IMAGEPROXY) {
 		require Slim::Web::ImageProxy;
@@ -59,6 +61,7 @@ sub postinitPlugin {
 		require Plugins::MyQobuz::MyQobuzImpl;
   		Plugins::MyQobuz::MyQobuzImpl->import();
 		$qobuz_installed = 1;
+		$log->error("Hugo postinitPlugin 1 qobuz = $qobuz_installed.");
 		if (main::WEBUI) {
 			require Plugins::MyQobuz::Settings;
 			Plugins::MyQobuz::Settings->new();
@@ -71,6 +74,10 @@ sub postinitPlugin {
 	}
 	or do {
 		$qobuz_installed = 0;
+		 my $error = $@ || 'Unknown failure';
+
+		$log->error("Hugo postinitPlugin 2 qobuz = $qobuz_installed .");
+		$log->error("Hugo postinitPlugin 2 error $error .");
 	};
 }
 
@@ -247,7 +254,7 @@ sub trackInfoMenu {
 
 			$items ||= [];
 	
-			if ($prefs->enableMyQobuz){
+			if ($prefs->enableDBConfig){
 				push @$items, {
 					name => cstring($client, 'PLUGIN_MY_QOBUZ_ALBUM', $album),
 					url  => \&Plugins::MyQobuz::MyQobuzImpl::QobuzManageMyQobuz,
