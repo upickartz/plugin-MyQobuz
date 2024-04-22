@@ -7,11 +7,11 @@
       <sha>5f846f2fd24de58c1c4c5f7d57108b9a496a2d2e</sha>
       <email>ulrich.pickartz@gmail.com</email>
       <desc lang="EN">MyQobuz view to Qobuz</desc>
-      <url>https://github.com/upickartz/plugin-MyQobuz/tree/main/repo/MyQobuz.zip</url>
+      <url>https://raw.githubusercontent.com/upickartz/plugin-MyQobuz/main/repo/MyQobuz.zip</url>
       <title lang="EN">MyQobuz Extensions</title>
     </plugin>
   </plugins>
   <details>
-    <title lang="EN">My LMS Plugins</title>
+    <title lang="EN">MyQobuz LMS Plugin</title>
   </details>
 </extensions>
