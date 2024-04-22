@@ -2,12 +2,12 @@
 <extensions>
   <plugins>
     <plugin version="0.0.3" name="MyQobuz" minTarget="7.8" maxTarget="*">
-      <link>http://github.com/philippe44/LMS-PodcastExt</link>
+      <link>https://github.com/upickartz/plugin-MyQobuz/blob/main/plugin/README.md</link>
       <creator>Ulrich</creator>
       <sha>5f846f2fd24de58c1c4c5f7d57108b9a496a2d2e</sha>
       <email>ulrich.pickartz@gmail.com</email>
       <desc lang="EN">MyQobuz view to Qobuz</desc>
-      <url>http://127.0.0.1:8080/MyQobuz.zip</url>
+      <url>https://github.com/upickartz/plugin-MyQobuz/tree/main/repo/MyQobuz.zip</url>
       <title lang="EN">MyQobuz Extensions</title>
     </plugin>
   </plugins>
