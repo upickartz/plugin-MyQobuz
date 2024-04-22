@@ -1,18 +1,21 @@
 
 [% PROCESS settings/header.html %]
+	[% WRAPPER settingSection %]	
+		[% WRAPPER settingGroup title="PLUGIN_SETTINGS_QOBUZ_FAVORITE" desc="" %]
+				<input type="checkbox" [% IF prefs.pref_enableFavoriteImport %]checked[% END %] class="stdedit" name="pref_enableFavoriteImport" id="pref_enableFavoriteImport" value="1" />
+				<label for="pref_enableFavoriteImport" class="stdlabel">[% "PLUGIN_SETTINGS_FAVORITE_IMPORT" | string %]</label>
+		[% END %]
+		[% IF prefs.pref_enableFavoriteImport %]
+			[% WRAPPER settingGroup title="PLUGIN_SETTINGS_QOBUZ_FAVORITE" desc="" %]
 
-	[% WRAPPER settingSection %]
-		
-		[% WRAPPER settingGroup title="PLUGIN_MY_QOBUZ" desc="" %]
-			<input type="checkbox" [% IF prefs.pref_enableDBConfig %]checked[% END %] class="stdedit" name="pref_enableDBConfig" id="pref_enableDBConfig" value="1" />
-			<label for="pref_enableDBConfig" class="stdlabel">[% "PLUGIN_SETTINGS_MY_QOBUZ_DB_CFG" | string %]</label>
+				<input type="checkbox" [% IF prefs.pref_deleteFavoriteAfterImport %]checked[% END %] class="stdedit" name="pref_deleteFavoriteAfterImport" id="pref_deleteFavoriteAfterImport" value="1" />
+				<label for="pref_deleteFavoriteAfterImport" class="stdlabel">[% "PLUGIN_SETTINGS_DELETE_FAVORITE" | string %]</label>
+			[% END %]
 		[% END %]
 		[% IF prefs.pref_enableDBConfig %]
 			[% WRAPPER settingGroup title="PLUGIN_SETTINGS_MY_QOBUZ_DB" desc="PLUGIN_SETTINGS_MY_QOBUZ_DB_DESC" %]
-			<input type="text" class="stdedit" name="pref_myQobuzDB" id="pref_myQobuzDB" value="[% prefs.myQobuzDB %]" size="90" />
+				<input type="text" class="stdedit" name="pref_myQobuzDB" id="pref_myQobuzDB" value="[% prefs.myQobuzDB %]" size="90" />
 			[% END %]
-		[% END %]
-		
+		[% END %]	
 	[% END %]
-
 [% PROCESS settings/footer.html %]

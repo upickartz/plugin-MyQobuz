@@ -79,6 +79,18 @@ PLUGIN_MY_QOBUZ_DELETED_ALBUM
 PLUGIN_MY_QOBUZ_LATEST_ALBUM
 	DE	Zuletzt importiert
 	EN	Last imported
+	
+PLUGIN_SETTINGS_QOBUZ_FAVORITE
+	DE	Qobuz Favoriten
+	EN	Qobuz favorites
+
+PLUGIN_SETTINGS_FAVORITE_IMPORT
+	DE	Aktiviere Import von Qobuz Favoriten
+	EN	Enable import of Qobuz favorites
+
+PLUGIN_SETTINGS_DELETE_FAVORITE
+	DE	Lösche Qobuz Favoriten nach Import
+	EN	Delete Qobuz favorites after import
 
 PLUGIN_MY_QOBUZ_DESC
 	DE	Definition einer eigenen Sicht 'MeinQobuz' auf Qobuz auf Albumebene (Hinzufügen und Entfernen von Alben). Tags können vergeben werden. um weitere Sichten zu definieren. 

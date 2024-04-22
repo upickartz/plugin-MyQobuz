@@ -22,7 +22,7 @@ sub page {
 }
 
 sub prefs {
-	return ($prefs, 'enableDBConfig', 'myQobuzDB');
+	return ($prefs,'enableDBConfig', 'enableFavoriteImport','deleteFavoriteAfterImport', 'myQobuzDB');
 }
 
 sub checkMyQobuzConfig {
@@ -49,8 +49,11 @@ sub handler {
 	$prefs->set('useragent', $params->{userAgent}) if $params->{userAgent};
 
 	if (  $params->{saveSettings} ) {
-		$params->{'pref_enableDBConfig'} ||= 0;
-		$params->{'pref_myQobuzDB'} ||= "MyQobuz";
+		my $enableDBConfig = $prefs->enableDBConfig ;
+		$params->{'pref_enableFavoriteImport'} ||= 0;
+		$params->{'pref_deleteFavoriteAfterImport'} ||= 0;
+		$params->{'pref_enableDBConfig'} = $enableDBConfig;
+		$params->{'pref_myQobuzDB'} ||= 'MyQobuz.db';
 		checkMyQobuzConfig($params);		
 	}
 

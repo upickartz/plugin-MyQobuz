@@ -17,6 +17,8 @@ my $qobuz_installed = 0;
 
 
 $prefs->init({
+	enableFavoriteImport => 1,
+	deleteFavoriteAfterImport => 1,
 	enableDBConfig => 0,
 	myQobuzDB => "MyQobuz.db",
 });
@@ -74,10 +76,9 @@ sub postinitPlugin {
 	}
 	or do {
 		$qobuz_installed = 0;
-		 my $error = $@ || 'Unknown failure';
-
-		$log->error("Hugo postinitPlugin 2 qobuz = $qobuz_installed .");
-		$log->error("Hugo postinitPlugin 2 error $error .");
+		my $error = $@ || 'Unknown failure';
+		$log->error("postinitPlugin: qobuz not installed.");
+		1;  # return true to indicate success
 	};
 }
 
@@ -125,110 +126,6 @@ sub handleFeed {
 	
 	$cb->({ items => $items });
 }
-
-
-
-sub _playlistItem {
-	my ($playlist, $showOwner, $isWeb) = @_;
-
-	my $image = Plugins::Qobuz::API::Common->getPlaylistImage($playlist);
-
-	my $owner = $showOwner ? $playlist->{owner}->{name} : undef;
-
-	return {
-		name  => $playlist->{name} . ($isWeb && $owner ? " - $owner" : ''),
-		name2 => $owner,
-		url   => \&QobuzPlaylistGetTracks,
-		image => $image,
-		passthrough => [{
-			playlist_id  => $playlist->{id},
-		}],
-		type  => 'playlist',
-	};
-}
-
-sub _trackItem {
-	my ($client, $track, $isWeb) = @_;
-
-	my $title = Plugins::Qobuz::API::Common->addVersionToTitle($track);
-	my $artist = Plugins::Qobuz::API::Common->getArtistName($track, $track->{album});
-	my $album  = $track->{album}->{title} || '';
-	if ( $track->{album}->{title} && $prefs->get('showDiscs') ) {
-		$album = Slim::Music::Info::addDiscNumberToAlbumTitle($album,$track->{media_number},$track->{album}->{media_count});
-	}
-	my $genre = $track->{album}->{genre};
-
-	my $item = {
-		name  => sprintf('%s %s %s %s %s', $title, cstring($client, 'BY'), $artist, cstring($client, 'FROM'), $album),
-		line1 => $title,
-		line2 => $artist . ($artist && $album ? ' - ' : '') . $album,
-		image => Plugins::Qobuz::API::Common->getImageFromImagesHash($track->{album}->{image}),
-	};
-
-	if ( $track->{hires_streamable} && $item->{name} !~ /hi.?res|bits|khz/i && $prefs->get('labelHiResAlbums') && Plugins::Qobuz::API::Common->getStreamingFormat($track->{album}) eq 'flac' ) {
-		$item->{name} .= ' (' . cstring($client, 'PLUGIN_QOBUZ_HIRES') . ')';
-		$item->{line1} .= ' (' . cstring($client, 'PLUGIN_QOBUZ_HIRES') . ')';
-	}
-
-	# Enhancements to work/composer display for classical music (tags returned from Qobuz are all over the place)
-	if ( $track->{album}->{isClassique} ) {
-		if ( $track->{work} ) {
-			$item->{work} = $track->{work};
-		} else {
-			# Try to set work to the title, but without composer if it's in there
-			if ( $track->{composer}->{name} && $track->{title} ) {
-				my @titleSplit = split /:\s*/, $track->{title};
-				$item->{work} = $track->{title};
-				if ( index($track->{composer}->{name}, $titleSplit[0]) != -1 ) {
-					$item->{work} =~ s/\Q$titleSplit[0]\E:\s*//;
-				}
-			}
-			# try to remove the title (ie track, movement) from the work
-			my @titleSplit = split /:\s*/, $track->{title};
-			my $tempTitle = @titleSplit[-1];
-			$item->{work} =~ s/:\s*\Q$tempTitle\E//;
-			$item->{line1} =~ s/\Q$item->{work}\E://;
-		}
-		$item->{displayWork} = $item->{work};
-		if ( $track->{composer}->{name} ) {
-			$item->{displayWork} = $track->{composer}->{name} . string('COLON') . ' ' . $item->{work};
-			my $composerSurname = (split ' ', $track->{composer}->{name})[-1];
-			$item->{line1} =~ s/\Q$composerSurname\E://;
-		}
-		$item->{line2} .= " - " . $item->{work} if $item->{work};
-	}
-
-	if ( $track->{album} ) {
-		$item->{year} = $track->{album}->{year} || substr($track->{$album}->{release_date_stream},0,4) || 0;
-	}
-
-	if ( $prefs->get('parentalWarning') && $track->{parental_warning} ) {
-		$item->{name} .= ' [E]';
-		$item->{line1} .= ' [E]';
-	}
-
-	if (!$track->{streamable} && (!$prefs->get('playSamples') || !$track->{sampleable})) {
-		$item->{items} = [{
-			name => cstring($client, 'PLUGIN_QOBUZ_NOT_AVAILABLE'),
-			type => 'textarea'
-		}];
-		$item->{name}      = '* ' . $item->{name};
-		$item->{line1}     = '* ' . $item->{line1};
-	}
-	else {
-		$item->{name}      = '* ' . $item->{name} if !$track->{streamable};
-		$item->{line1}     = '* ' . $item->{line1} if !$track->{streamable};
-		$item->{play}      = Plugins::Qobuz::API::Common->getUrl($client, $track);
-		$item->{on_select} = 'play';
-		$item->{playall}   = 1;
-	}
-
-	$item->{tracknum} = $track->{track_number};
-	$item->{media_number} = $track->{media_number};
-	$item->{media_count} = $track->{album}->{media_count};
-	return $item;
-}
-
 sub trackInfoMenu {
 	my ( $client, $url, $track, $remoteMeta, $tags ) = @_;
 
@@ -253,15 +150,12 @@ sub trackInfoMenu {
 			}
 
 			$items ||= [];
-	
-			if ($prefs->enableDBConfig){
 				push @$items, {
 					name => cstring($client, 'PLUGIN_MY_QOBUZ_ALBUM', $album),
 					url  => \&Plugins::MyQobuz::MyQobuzImpl::QobuzManageMyQobuz,
 					passthrough => [$args],
 				} if keys %$args;
 			}
-		}
 
 	};
 
