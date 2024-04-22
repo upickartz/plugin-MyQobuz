@@ -1,5 +1,5 @@
 # plugin-MyQobuz
 ## Installation
 Insert additional  repository  
-    https://github.com/upickartz/plugin-MyQobuz/tree/main/repo/MyQobuz.zip 
+    https://raw.githubusercontent.com/upickartz/plugin-MyQobuz/main/repo/myqobuz.xml
 into the settings page of LMS.
