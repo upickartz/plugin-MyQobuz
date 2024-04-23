@@ -2,7 +2,7 @@
 <extensions>
   <plugins>
     <plugin version="0.0.3" name="MyQobuz" minTarget="7.8" maxTarget="*">
-      <link>https://github.com/upickartz/plugin-MyQobuz/blob/main/plugin/README.md</link>
+      <link>https://github.com/upickartz/plugin-MyQobuz/blob/main/MyQobuz</link>
       <creator>Ulrich</creator>
       <sha>5f846f2fd24de58c1c4c5f7d57108b9a496a2d2e</sha>
       <email>ulrich.pickartz@gmail.com</email>
