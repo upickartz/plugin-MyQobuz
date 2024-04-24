@@ -101,8 +101,8 @@ PLUGIN_SETTINGS_MY_QOBUZ_DB
 	EN	Database of 'MyQobuz'.
 
 PLUGIN_SETTINGS_MY_QOBUZ_DB_DESC
-	DE	Falls leer wird die DB MyQobuz.db in Verzeichnis 'Cache' gespeichert. Sonst muss ein gültiges Verzeichnis angegeben werden und/oder ein DB name. 
-	EN	If empty, default location in folder 'Cache' will be used for MyQobuz.db. Otherwise a valid directory path must be provided and/or a filename for the DB.
+	DE	Falls leer wird die DB MyQobuz.db in Verzeichnis 'Prefs' gespeichert. Sonst muss ein gültiges Verzeichnis angegeben werden und/oder ein DB name. 
+	EN	If empty, default location in folder 'Prefs' will be used for MyQobuz.db. Otherwise a valid directory path must be provided and/or a filename for the DB.
 
 PLUGIN_SETTINGS_MY_QOBUZ_DB_CFG
 	DE	Datenbank von 'MeinQobuz' konfigurirbar machen. 

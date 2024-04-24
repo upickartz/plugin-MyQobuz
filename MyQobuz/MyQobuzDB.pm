@@ -5,6 +5,7 @@ use utf8;
 use DBI;
 use Slim::Utils::Log;
 use Slim::Utils::Prefs;
+use Slim::Utils::OSDetect;
 
 use File::Spec::Functions qw(catfile);
 use File::Basename;
@@ -112,10 +113,9 @@ sub createDB {
 
 sub getDbPath {
     # create default for no or wrong entry
-    my $s_prefs = preferences('server');
-	my $cachedir = $s_prefs->get('cachedir');
-    my $dbPath = catfile($cachedir,'MyQobuz.db');
-    $log->info("MyQobuzDB::getDbPath init cache $cachedir");
+    my $prefs_dir =  Slim::Utils::OSDetect::dirsFor('prefs');
+    my $dbPath = catfile($prefs_dir,'MyQobuz.db');
+    $log->info("MyQobuzDB::getDbPath prefs_dir: $prefs_dir");
     $log->info("MyQobuzDB::getDbPath init dbPath $dbPath ");
     #check user defined entry
     my $prefs = preferences('plugin.myqobuz');
@@ -123,10 +123,10 @@ sub getDbPath {
     if (-d $userPath) {
         # only directory provided => take dafault name for DB
         $dbPath =  catfile( $userPath,'MyQobuz.db'); 
-        $log->error("MyQobuzDB::getDbPath user path is existing directory");
+        $log->info("MyQobuzDB::getDbPath user path is existing directory");
     }elsif (-e $userPath) {
          # DB is provided with directory and filename
-         $log->error("MyQobuzDB::getDbPath user path is existing file");
+         $log->info("MyQobuzDB::getDbPath user path is existing file");
          $dbPath = $userPath; 
     }else {
         my $basename = basename($userPath);
@@ -142,8 +142,8 @@ sub getDbPath {
                     $log->error("wrong file specification for MyQobuz.db; take default");
                 }else{
                     # case dirname empty ony basename with *.db 
-                    # => create in Cache directory
-                    $dbPath = catfile($cachedir,$basename);
+                    # => create in prefs directory
+                    $dbPath = catfile($prefs_dir,$basename);
                 }
             } 
         }else{
