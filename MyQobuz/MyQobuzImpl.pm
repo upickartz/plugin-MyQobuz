@@ -20,41 +20,6 @@ sub _stripHTML {
 	return $html;
 }
 
-sub MyQobuz {
-	my ($client, $cb, $params, $args) = @_;
-	$log->info("Plugins::MyQobuz::MyQobuzImpl MyQobuz  called.");
-	my $items = [
-		{
-			name => cstring($client, 'PLUGIN_MY_QOBUZ_GENRE'),
-			url  => \&MyQobuzGenres
-		},
-		{
-			name => cstring($client, 'PLUGIN_MY_QOBUZ_ARTIST'),
-			url  => \&MyQobuzArtists
-		},
-		{
-				name  => cstring($client, 'PLUGIN_MY_QOBUZ_SELECT_TAG'),
-				url  => \&MyQobuzSelectTag,
-		},
-		{
-			name => cstring($client, 'PLUGIN_MY_QOBUZ_LATEST_ALBUM'),
-			url  => \&MyLatestAlbums,
-		},
-	];
-
-	my $instance = Plugins::MyQobuz::MyQobuzDB->getInstance(); 
-	if ($instance->areAlbumsRemovedByQobuz() == 1 ) {
-		push @{$items} , {			
-			name  => cstring($client, 'PLUGIN_MY_QOBUZ_DELETED_ALBUMS'),
-			url  => \&MyQobuzDeletedAlbums
-		}
-	}
-	
-	$cb->({
-		items => $items
-	})
-	
-}
 
 sub MyQobuzGenres {
 	my ($client, $cb, $params, $args) = @_;
@@ -124,7 +89,7 @@ sub MyQobuzArtist {
 	my ($client, $cb, $params, $args) = @_;
 
 	my $artistId = $args->{artistId};
-	$log->debug("MyQobuzArtist called with $artistId .");
+	$log->info("MyQobuzArtist called with $artistId .");
 	my $myQobuzAlbumFilter = $args->{myQobuzAlbumFilter};
 	my $api = Plugins::Qobuz::Plugin::getAPIHandler($client);
 	$api->getArtist( sub {
@@ -469,6 +434,53 @@ sub QobuzRemoveTagFromMyQobuz {
 			type        => 'text',
 			name        => cstring($client, 'PLUGIN_QOBUZ_REMOVED_TAG_FROM_MY_QOBUZ',$tagName),
 		}]});
+}
+
+sub QobuzImportFavorites {
+	my ($client, $cb, $params, $args) = @_;
+	my $prefs = preferences('plugin.myqobuz');
+	my $delete_imported = $prefs->deleteFavoriteAfterImport;
+	my $api = Plugins::Qobuz::Plugin::getAPIHandler($client);
+	$api->getUserFavorites(sub {
+		my $favorites = shift;
+		eval {
+			if (scalar (@{$favorites->{albums}->{items}}) > 0){
+				for my $album ( @{$favorites->{albums}->{items}} ) {
+					$api->getAlbum(sub {
+						my $album_with_tracks = shift;
+						# insert albums to MyQobuz
+						$log->info("QobuzImportFavorites import: $album_with_tracks->{id} , $album_with_tracks->{title}" );
+						Plugins::MyQobuz::MyQobuzDB->getInstance()->insertAlbum($album_with_tracks);
+						# delete from Qobuz favorites
+						if ($delete_imported){
+							$log->info("QobuzImportFavorites delete Qobuz favorite: $album_with_tracks->{id} , $album_with_tracks->{title}" );
+							$api->deleteFavorite(sub {},{album_ids =>  $album_with_tracks->{id}});
+						}
+					},$album->{id});
+				}
+				$cb->({items => [{
+					type        => 'text',
+					name        => cstring($client, 'PLUGIN_MY_QOBUZ_FAVORITE_ALBUMS_IMPORTED'),
+				}] });
+			}else{
+				$cb->({items => [{
+					type        => 'text',
+					name        => cstring($client, 'PLUGIN_MY_QOBUZ_NO_FAVORITES'),
+				}] });
+			}
+	
+			1;
+		}
+		or do {
+			my $error = $@ || 'Unknown failure';
+			$log->error("Error during import of favorites: $error .");
+			$cb->({items => [{
+				type        => 'text',
+				name        => cstring($client, 'PLUGIN_MY_QOBUZ_FAVORITE_ALBUMS_IMPORT_ERROR'),
+			}] });
+			1;
+		}
+	});
 }
 
 

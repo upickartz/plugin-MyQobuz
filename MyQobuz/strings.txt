@@ -107,3 +107,19 @@ PLUGIN_SETTINGS_MY_QOBUZ_DB_DESC
 PLUGIN_SETTINGS_MY_QOBUZ_DB_CFG
 	DE	Datenbank von 'MeinQobuz' konfigurirbar machen. 
 	EN	Make 'MyQobuz' database configurable.
+
+PLUGIN_MY_QOBUZ_IMPORT_FAVORITE_ALBUMS
+	DE	Importiere favorisierte Alben von Qobuz. 
+	EN	Import favorite albums from Qobuz.
+
+PLUGIN_MY_QOBUZ_FAVORITE_ALBUMS_IMPORTED
+	DE	Favorisierte Alben von Qobuz importiert. 
+	EN	Favorite albums from Qobuz imported.
+
+PLUGIN_MY_QOBUZ_NO_FAVORITES
+	DE	Keine Qobuz-Favoriten verfügbar. 
+	EN	No Qobuz favorites available.
+
+PLUGIN_MY_QOBUZ_FAVORITE_ALBUMS_IMPORT_ERROR
+	DE	Fehler beim Import der Qobuz-Favoriten.
+	EN	Error during import of Qobuz favorites.

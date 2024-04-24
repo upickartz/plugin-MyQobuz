@@ -29,11 +29,10 @@ sub checkMyQobuzConfig {
 		my ($params) = @_;
 		## check db config is enabled
 		my $enableDBConfig = $prefs->enableDBConfig ;
-		$log->error("Hugo checkMyQobuzConfig  old: $enableDBConfig; new: $params->{pref_enableDBConfig} .");
 		if($enableDBConfig) {
 			my $oldQobuzDbName = $prefs->myQobuzDB;
 			my $newQobuzDbName = $params->{pref_myQobuzDB};
-			$log->error("Hugo checkMyQobuzConfig  oldDB: $oldQobuzDbName ; newDB: $newQobuzDbName .");
+			$log->info("checkMyQobuzConfig  oldDB: $oldQobuzDbName ; newDB: $newQobuzDbName .");
 			if ( defined $oldQobuzDbName  and ($newQobuzDbName ne $oldQobuzDbName) ) {
 				# Trigger restart required message
 				Plugins::MyQobuz::MyQobuzDB->resetDB();

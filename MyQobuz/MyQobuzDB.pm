@@ -151,7 +151,7 @@ sub getDbPath {
         }
     }
 
-    $log->error("dbPath:  $dbPath");
+    $log->info("dbPath:  $dbPath");
     return $dbPath;
  
 }
@@ -399,7 +399,6 @@ sub checkAlbumRemovedByQobuz {
 
 sub getInstance {
             if (not defined $instance){
-                $log->debug("Plugins::MyQobuz::MyQobuzDB instance not defined");
                 $instance = bless {}, shift ;
                 $instance->init();
                 $instance->checkAlbumRemovedByQobuz();

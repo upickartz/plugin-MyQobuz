@@ -38,7 +38,7 @@ sub initPlugin {
 	my $class = shift;
 	#DEBUG
  	my $dbConfig = $prefs->enableDBConfig;
-	$log->error("Hugo initPlugin  dbConfig: $dbConfig ");
+	$log->info("initPlugin  dbConfig: $dbConfig ");
 	# "Local Artwork" requires LMS 7.8+, as it's using its imageproxy.
 	if (CAN_IMAGEPROXY) {
 		require Slim::Web::ImageProxy;
@@ -63,7 +63,7 @@ sub postinitPlugin {
 		require Plugins::MyQobuz::MyQobuzImpl;
   		Plugins::MyQobuz::MyQobuzImpl->import();
 		$qobuz_installed = 1;
-		$log->error("Hugo postinitPlugin 1 qobuz = $qobuz_installed.");
+		$log->info("postinitPlugin qobuz installed = $qobuz_installed.");
 		if (main::WEBUI) {
 			require Plugins::MyQobuz::Settings;
 			Plugins::MyQobuz::Settings->new();
@@ -78,6 +78,7 @@ sub postinitPlugin {
 		$qobuz_installed = 0;
 		my $error = $@ || 'Unknown failure';
 		$log->error("postinitPlugin: qobuz not installed.");
+		$log->error("postinitPlugin error: $error .");
 		1;  # return true to indicate success
 	};
 }
@@ -100,27 +101,39 @@ sub handleFeed {
 	my $items = [
 		{
 			name => cstring($client, 'PLUGIN_MY_QOBUZ_GENRE'),
-			url  => \&Plugins::MyQobuz::MyQobuzImpl::MyQobuzGenres
+			url  => \&Plugins::MyQobuz::MyQobuzImpl::MyQobuzGenres,
+			image => 'html/images/genres.png',
 		},
 		{
 			name => cstring($client, 'PLUGIN_MY_QOBUZ_ARTIST'),
-			url  => \&Plugins::MyQobuz::MyQobuzImpl::MyQobuzArtists
+			url  => \&Plugins::MyQobuz::MyQobuzImpl::MyQobuzArtists,
+			image => 'html/images/artists.png',
 		},
 		{
 				name  => cstring($client, 'PLUGIN_MY_QOBUZ_SELECT_TAG'),
 				url  => \&Plugins::MyQobuz::MyQobuzImpl::MyQobuzSelectTag,
+				image => 'plugins/MyQobuz/html/images/tag.png'
 		},
 		{
 			name => cstring($client, 'PLUGIN_MY_QOBUZ_LATEST_ALBUM'),
 			url  => \&Plugins::MyQobuz::MyQobuzImpl::MyLatestAlbums,
+			image => 'html/images/albums.png',
 		},
 	];
+
+	if ( $prefs->enableFavoriteImport) {
+		push @{$items} , {
+				name => cstring($client, 'PLUGIN_MY_QOBUZ_IMPORT_FAVORITE_ALBUMS'),
+				url  => \&Plugins::MyQobuz::MyQobuzImpl::QobuzImportFavorites,
+				image => 'html/images/favorites.png'
+			}
+	}
 
 	my $instance = Plugins::MyQobuz::MyQobuzDB->getInstance(); 
 	if ($instance->areAlbumsRemovedByQobuz() == 1 ) {
 		push @{$items} , {			
 			name  => cstring($client, 'PLUGIN_MY_QOBUZ_DELETED_ALBUMS'),
-			url  => \&MyQobuzDeletedAlbums
+			url  => \&Plugins::MyQobuz::MyQobuzImpl::MyQobuzDeletedAlbums
 		}
 	}
 	
@@ -130,20 +143,13 @@ sub trackInfoMenu {
 	my ( $client, $url, $track, $remoteMeta, $tags ) = @_;
 
 	my $album  = $track->remote ? $remoteMeta->{album}  : ( $track->album ? $track->album->name : undef );
-
-	$log->error("Hugo trackInfoMenu album.");
-	$log->error(Data::Dump::dump($album));
 	my $items;
 
 	if ( my ($trackId) = Plugins::Qobuz::ProtocolHandler->crackUrl($url) ) {
 		my $albumId = $remoteMeta ? $remoteMeta->{albumId} : undef;
-
-		$log->error("Hugo trackInfoMenu albumId:  $albumId  ");
-		
 		if ( $albumId) {
 			my $args = {};
 	
-
 			if ($albumId && $album) {
 				$args->{albumId} = $albumId;
 				$args->{album}   = $album;
@@ -172,9 +178,7 @@ sub trackInfoMenu {
 
 sub _imgProxy { if (CAN_IMAGEPROXY) {
 	my ($url, $spec) = @_;
-
-	#main::DEBUGLOG && $log->debug("Artwork for $url, $spec");
-
+	
 	# https://github.com/Qobuz/api-documentation#album-cover-sizes
 	my $size = Slim::Web::ImageProxy->getRightSize($spec, {
 		50 => 50,
