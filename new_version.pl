@@ -45,6 +45,7 @@ sub create_zip {
     $zipa->add("MyQobuz/strings.txt");
     $zipa->add("MyQobuz/HTML/EN/plugins/MyQobuz/html/images/icon.png");
     $zipa->add("MyQobuz/HTML/EN/plugins/MyQobuz/html/images/qobuz.png");
+    $zipa->add("MyQobuz/HTML/EN/plugins/MyQobuz/html/images/tag.png");
     $zipa->add("MyQobuz/HTML/EN/plugins/MyQobuz/settings/basic.html");
     $zipa->close();
 }
