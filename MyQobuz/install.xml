@@ -3,7 +3,7 @@
 	<id>414e94bb-0b79-4326-b18e-d9f8d1b65b1d</id>
 	<name>PLUGIN_MY_QOBUZ</name>
 	<module>Plugins::MyQobuz::Plugin</module>
-	<version>0.0.9</version>
+	<version>1.0.0</version>
 	<description>PLUGIN_MY_QOBUZ_DESC</description>
 	<creator>Ulrich Pickartz</creator>
 	<email>ulrich.pickartz@gmail.com</email>
