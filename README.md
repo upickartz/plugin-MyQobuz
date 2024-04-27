@@ -9,7 +9,7 @@ Therefore, a new plugin 'MyQobuz' is provided for the LMS, which contains my sel
 Additionally, to the selection by genre and/or (alphabetically sorted) artists, a possibility to define tags for ‘MyQobuz’ albums is provided. 
 Adding or removing albums to 'MyQobuz' will be done via an extension of the track menu. It is also possible to correct the definition of the genre of an album defined by Qobuz, because often the Qobuz definition doesn't fit for me.
 
-Also, the possibility to add all 'Qobuz' favorite albums to 'MyQobuz' is provided. It can be configured in the settings if the favorite albums should be removed from the Qobuz favorites or not.
+It is also possible to add all “Qobuz” favorites to “MyQobuz”. In the settings you can configure whether the favorites should be removed from the Qobuz favorites after import or not.
 
 The plugin 'MyQobuz' requires the functionality of the 'Qobuz' plugin, e.g. for playing the albums, searching for new albums and technical accessing the Qobuz API. The installation of the 'Qobuz' plugin is required for the 'MyQobuz' plugin and therefore also a Qobuz account for the user is required (the same as for the 'Qobuz' plugin). 
 
@@ -21,7 +21,7 @@ For the section 'MyQobuz' a separate sqlite database is provided. The default lo
 ## User Guide
 
 ### Installation
-Insert additional repository 
+Insert an additional repository 
  https://raw.githubusercontent.com/upickartz/plugin-MyQobuz/main/repo/myqobuz.xml
 into the settings page of LMS. After applying you see the 'MyQobuz' plugin for activation:
 !['MyQobuz' activation](assets/IMG_0053.PNG "Enable 'MyQobuz'")
@@ -40,7 +40,7 @@ Using the tag e.g. 'lp', which means the album is also available as vinyl lp (in
 !['MyQobuz' tags](assets/use_tag2.PNG "Using a tag")
 
 ### Edit 'MyQobuz' Collection of Albums
-To add, remove, or edit entries of 'MyQobuz' one has to go over the track menu entry 'On Qobuz'during hearing an album via 'Qobuz':
+To add, remove, or edit entries of 'MyQobuz' one has to go over the track menu entry 'On Qobuz' during hearing an album via 'Qobuz':
 !['MyQobuz' track menu](assets/IMG_0047.PNG "Entry point for 'MyQobuz'to edit in the track info menu")
 
 In the example, you find the album 'My Song' by Keith Jarret just playing. So you get the entry 'My Song' add to 'MyQobuz', if it is not available:
