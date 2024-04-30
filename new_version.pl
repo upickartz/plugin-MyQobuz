@@ -20,6 +20,7 @@
 use strict;
 
 use Data::Dumper;
+use File::Path qw( make_path );
  
 use XML::Simple qw(:strict);
 use Archive::Zip::SimpleZip qw($SimpleZipError) ;
@@ -52,7 +53,9 @@ sub check_version {
 }
 
 sub create_zip { 
-    my $zipa = new Archive::Zip::SimpleZip("repo/MyQobuz.zip") 
+    my $path = shift;
+    make_path($path);
+    my $zipa = new Archive::Zip::SimpleZip($path . "/MyQobuz.zip") 
         or die "Cannot create zip file: $SimpleZipError\n" ;
     $zipa->add("MyQobuz/install.xml");
     $zipa->add("MyQobuz/MyQobuzImpl.pm");
@@ -69,18 +72,23 @@ sub create_zip {
 
 sub update_repo {
     my $version = shift;
+    my $path = shift;
     my $sha1 = shift;
     print "Update version to $version\n";
     print "Update sha to $sha1\n";
+    print "Update path to $path\n";
     my $repoFile = './repo/myqobuz.xml';
     # parse XML
     my $ref = XMLin($repoFile,
 			KeyAttr    => [],
 			ForceArray => [  'creator', 'sha', 'email', 'desc', 'link','url', 'title' , 'plugin', 'plugins'],
 		);
-    # update sha1 and version
+    # update sha1, version and url
     $ref->{plugins}->[0]->{plugin}->[0]->{version} = $version;
     $ref->{plugins}->[0]->{plugin}->[0]->{sha}->[0] = $sha1;
+    my $url = 'https://raw.githubusercontent.com/upickartz/plugin-MyQobuz/main/' . $path . "/MyQobuz.zip";
+    $ref->{plugins}->[0]->{plugin}->[0]->{url}->[0] = $url;
+    
     # write out
     XMLout($ref,
         RootName   => 'extensions',
@@ -94,15 +102,16 @@ sub update_repo {
 #   main 
 #
  my $new_version = check_version();
+ my $path = "repo/release/" . $new_version; 
  if ( $new_version ) {
     print "Ok: versions consistent\n";
     #create new zip
-    create_zip();
+    create_zip($path);
     #calculate sha1
-    my $sha1  = sha1_file_hex('./repo/MyQobuz.zip');
+    my $sha1  = sha1_file_hex($path . "/MyQobuz.zip");
     print "sha1: $sha1 \n";
     # update repo 
-    update_repo($new_version ,$sha1);
+    update_repo($new_version,$path,$sha1);
  }else{
     print "Error: versions not consistent\n";
  }

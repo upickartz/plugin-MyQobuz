@@ -7,10 +7,10 @@
       <creator>Ulrich Pickartz</creator>
       <desc lang="EN">MyQobuz view to Qobuz</desc>
       <email>ulrich.pickartz@gmail.com</email>
-      <link>https://github.com/upickartz/plugin-MyQobuz/blob/main/MyQobuz</link>
-      <sha>1de3f03b7beae8b9b7df6470504334e25bb0a9ad</sha>
+      <link>https://github.com/upickartz/plugin-MyQobuz</link>
+      <sha>ab1cd278897c435b09a8c84019cfd5e3459b429b</sha>
       <title lang="EN">MyQobuz Extensions</title>
-      <url>https://raw.githubusercontent.com/upickartz/plugin-MyQobuz/main/repo/MyQobuz.zip</url>
+      <url>https://raw.githubusercontent.com/upickartz/plugin-MyQobuz/main/repo/release/1.0.0/MyQobuz.zip</url>
     </plugin>
   </plugins>
 </extensions>
