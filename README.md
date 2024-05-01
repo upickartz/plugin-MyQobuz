@@ -21,10 +21,8 @@ For the section 'MyQobuz' a separate sqlite database is provided. The default lo
 ## User Guide
 
 ### Installation
-Insert an additional repository 
- https://raw.githubusercontent.com/upickartz/plugin-MyQobuz/main/repo/myqobuz.xml
-into the settings page of LMS. After applying you see the 'MyQobuz' plugin for activation:
-!['MyQobuz' activation](assets/IMG_0053.PNG "Enable 'MyQobuz'")
+The 'MyQobuz' plugin is available on the Settings page of the LMS in the section 'Plugins'. Here you find it in the '3rd party plugins' section:
+!['MyQobuz' activation](assets/settings.png "Enable 'MyQobuz'")
 
 After activation, you will find 'MyQobuz' in the 'Active plugin' section and you can navigate to the settings page:
 !['MyQobuz' settings](assets/IMG_0054.PNG "'MyQobuz' settings")
