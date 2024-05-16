@@ -135,6 +135,11 @@ sub handleFeed {
 			url  => \&Plugins::MyQobuz::MyQobuzImpl::MyLatestAlbums,
 			image => 'html/images/albums.png',
 		},
+		# {
+		# 	name => 'Reimport all',
+		# 	url  => \&Plugins::MyQobuz::MyQobuzImpl::ReimportAllAlbums,
+		# 	image => 'html/images/albums.png',
+		# },
 	];
 
 	if ( $prefs->enableFavoriteImport) {

@@ -499,5 +499,32 @@ sub QobuzImportFavorites {
 	});
 }
 
+# # solved the problem of non imported tracks ( you have to set the number of LatestAlbums suitable)
+# sub ReimportAllAlbums {
+# 	my ($client, $cb, $params, $args) = @_;
+# 	my $myLatestAlbums = Plugins::MyQobuz::MyQobuzDB->getInstance()->getLatestAlbums();
+# 	my $count =  scalar @{$myLatestAlbums};
+# 	$log->error("Hugo ReimportAllAlbums count: $count" );
+# 	my $api = Plugins::Qobuz::Plugin::getAPIHandler($client);	
+# 	my @myArtists;
+# 	my @data;
+# 	my $item;
+# 	foreach my $album (@{$myLatestAlbums})
+# 	{
+			
+# 		# insert albums to MyQobuz
+# 		$log->info("Hugo ReimportAllAlbums import: $album->{id}" );
+# 		# get album from qobuz
+# 		$api->getAlbum(sub {
+# 						my $album_with_tracks = shift;
+# 						# insert albums to MyQobuz
+# 						$log->error("Hugo ReimportAllAlbums import: $album_with_tracks->{id} , $album_with_tracks->{title}" );
+# 						Plugins::MyQobuz::MyQobuzDB->getInstance()->insertAlbum($album_with_tracks);
+				
+# 					},$album->{id});
+
+# 	}
+
+# }
 
 1;
