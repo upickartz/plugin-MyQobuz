@@ -34,7 +34,8 @@ my $qobuz_installed = 0;
 
 $prefs->init({
 	enableFavoriteImport => 1,
-	deleteFavoriteAfterImport => 1,
+	enableFavoriteExport => 0,
+	deleteFavoriteAfterImport => 0,
 	enableDBConfig => 0,
 	myQobuzDB => "MyQobuz.db",
 });
@@ -146,6 +147,14 @@ sub handleFeed {
 		push @{$items} , {
 				name => cstring($client, 'PLUGIN_MY_QOBUZ_IMPORT_FAVORITE_ALBUMS'),
 				url  => \&Plugins::MyQobuz::MyQobuzImpl::QobuzImportFavorites,
+				image => 'html/images/favorites.png'
+			}
+	}
+
+	if ( $prefs->enableFavoriteExport) {
+		push @{$items} , {
+				name => cstring($client, 'PLUGIN_MY_QOBUZ_EXPORT_FAVORITE_ALBUMS'),
+				url  => \&Plugins::MyQobuz::MyQobuzImpl::QobuzExportToFavorites,
 				image => 'html/images/favorites.png'
 			}
 	}

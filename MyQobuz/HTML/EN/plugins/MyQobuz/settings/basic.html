@@ -2,6 +2,10 @@
 [% PROCESS settings/header.html %]
 	[% WRAPPER settingSection %]	
 		[% WRAPPER settingGroup title="PLUGIN_SETTINGS_QOBUZ_FAVORITE" desc="" %]
+			<input type="checkbox" [% IF prefs.pref_enableFavoriteExport %]checked[% END %] class="stdedit" name="pref_enableFavoriteExport" id="pref_enableFavoriteExport" value="1" />
+			<label for="pref_enableFavoriteExport" class="stdlabel">[% "PLUGIN_SETTINGS_FAVORITE_EXPORT" | string %]</label>
+		[% END %]
+		[% WRAPPER settingGroup title="PLUGIN_SETTINGS_QOBUZ_FAVORITE" desc="" %]
 				<input type="checkbox" [% IF prefs.pref_enableFavoriteImport %]checked[% END %] class="stdedit" name="pref_enableFavoriteImport" id="pref_enableFavoriteImport" value="1" />
 				<label for="pref_enableFavoriteImport" class="stdlabel">[% "PLUGIN_SETTINGS_FAVORITE_IMPORT" | string %]</label>
 		[% END %]

@@ -499,32 +499,39 @@ sub QobuzImportFavorites {
 	});
 }
 
-# # solved the problem of non imported tracks ( you have to set the number of LatestAlbums suitable)
-# sub ReimportAllAlbums {
-# 	my ($client, $cb, $params, $args) = @_;
-# 	my $myLatestAlbums = Plugins::MyQobuz::MyQobuzDB->getInstance()->getLatestAlbums();
-# 	my $count =  scalar @{$myLatestAlbums};
-# 	$log->error("Hugo ReimportAllAlbums count: $count" );
-# 	my $api = Plugins::Qobuz::Plugin::getAPIHandler($client);	
-# 	my @myArtists;
-# 	my @data;
-# 	my $item;
-# 	foreach my $album (@{$myLatestAlbums})
-# 	{
-			
-# 		# insert albums to MyQobuz
-# 		$log->info("Hugo ReimportAllAlbums import: $album->{id}" );
-# 		# get album from qobuz
-# 		$api->getAlbum(sub {
-# 						my $album_with_tracks = shift;
-# 						# insert albums to MyQobuz
-# 						$log->error("Hugo ReimportAllAlbums import: $album_with_tracks->{id} , $album_with_tracks->{title}" );
-# 						Plugins::MyQobuz::MyQobuzDB->getInstance()->insertAlbum($album_with_tracks);
-				
-# 					},$album->{id});
+sub QobuzExportToFavorites {
+	my ($client, $cb, $params, $args) = @_;
+	my $prefs = preferences('plugin.myqobuz');
+	my $api = Plugins::Qobuz::Plugin::getAPIHandler($client);
+	eval {
+			my $myAlbums = Plugins::MyQobuz::MyQobuzDB->getInstance()->getAllAlbums();
+			my $count =  scalar @{$myAlbums};
+			$log->info("QobuzExportToFavorites export count: $count" );
+			foreach my $albumref (@{$myAlbums})	{	
+				# make qobuz favorite album
+				my $args = { album_ids => $albumref->[0] }; 
+				$api->createFavorite(sub {
+					my $result = shift;
+				}, $args);
 
-# 	}
+			}
+			$cb->({items => [{
+					type        => 'text',
+					name        => cstring($client, 'PLUGIN_MY_QOBUZ_ALBUMS_EXPORTED'),
+				}] });
 
-# }
+			1;
+	}
+	or do {
+			my $error = $@ || 'Unknown failure';
+			$log->error("Error during export to Qobuz favorites: $error .");
+			$cb->({items => [{
+				type        => 'text',
+				name        => cstring($client, 'PLUGIN_MY_QOBUZ_FAVORITE_ALBUMS_EXPORT_ERROR'),
+			}] });
+			1;
+	}
+}
+
 
 1;

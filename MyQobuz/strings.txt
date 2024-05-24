@@ -88,6 +88,10 @@ PLUGIN_SETTINGS_FAVORITE_IMPORT
 	DE	Aktiviere Import von Qobuz Favoriten
 	EN	Enable import of Qobuz favorites
 
+PLUGIN_SETTINGS_FAVORITE_EXPORT
+	DE	Aktiviere Export von 'MyQobuz' zu  'Qobuz' Favoriten
+	EN	Enable export from 'MyQobuz' to 'Qobuz' favorites
+
 PLUGIN_SETTINGS_DELETE_FAVORITE
 	DE	Lösche Qobuz Favoriten nach Import
 	EN	Delete Qobuz favorites after import
@@ -112,9 +116,17 @@ PLUGIN_MY_QOBUZ_IMPORT_FAVORITE_ALBUMS
 	DE	Importiere favorisierte Alben von Qobuz. 
 	EN	Import favorite albums from Qobuz.
 
+PLUGIN_MY_QOBUZ_EXPORT_FAVORITE_ALBUMS
+	DE	Exportiere alle Alben von 'MyQobuz' als Favoriten in 'Qobuz'. 
+	EN	Export all albums from 'MyQobuz' as favorites in 'Qobuz'.
+
 PLUGIN_MY_QOBUZ_FAVORITE_ALBUMS_IMPORTED
-	DE	Favorisierte Alben von Qobuz importiert. 
-	EN	Favorite albums from Qobuz imported.
+	DE	Favorisierte Alben von 'Qobuz' importiert. 
+	EN	Favorite albums from 'Qobuz' imported.
+
+PLUGIN_MY_QOBUZ_ALBUMS_EXPORTED
+	DE	Alle Alben von 'MyQobuz' als 'Qobuz' Favoriten exportiert. 
+	EN	All albums from 'MyQobuz' exported as 'Qobuz' favorites.
 
 PLUGIN_MY_QOBUZ_NO_FAVORITES
 	DE	Keine Qobuz-Favoriten verfügbar. 
@@ -123,3 +135,7 @@ PLUGIN_MY_QOBUZ_NO_FAVORITES
 PLUGIN_MY_QOBUZ_FAVORITE_ALBUMS_IMPORT_ERROR
 	DE	Fehler beim Import der Qobuz-Favoriten.
 	EN	Error during import of Qobuz favorites.
+
+PLUGIN_MY_QOBUZ_FAVORITE_ALBUMS_EXPORT_ERROR
+	DE	Fehler beim Export zu 'Qobuz' Favoriten.
+	EN	Error exporting to 'Qobuz' favorites.
