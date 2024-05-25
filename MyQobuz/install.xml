@@ -3,10 +3,10 @@
 	<id>414e94bb-0b79-4326-b18e-d9f8d1b65b1d</id>
 	<name>PLUGIN_MY_QOBUZ</name>
 	<module>Plugins::MyQobuz::Plugin</module>
-	<version>1.0.0</version>
+	<version>1.1.0</version>
 	<description>PLUGIN_MY_QOBUZ_DESC</description>
 	<creator>Ulrich Pickartz</creator>
-	<email>ulrich.pickartz@gmail.com</email>
+	<email>ulrich@pickartz.me</email>
 	<defaultState>enabled</defaultState>
 	<icon>plugins/MyQobuz/html/images/qobuz.png</icon>
 	<optionsURL>plugins/MyQobuz/settings/basic.html</optionsURL>

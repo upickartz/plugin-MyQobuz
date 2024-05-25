@@ -1,5 +1,15 @@
 # plugin-MyQobuz
 
+## Release Notes
+
+
+|  Version  | Release Date | Notes |
+| :-- | :-- | :-- |
+| 1.0.0 | April 29, 2024 |  initial release  |
+| 1.1.0 | May 25, 2024 |  default setting fixed:  'Delete Qobuz favorites after import' = false <br> new feature: export all albums to 'Qobuz' favorites    |
+
+
+
 ## Motivation
 The Qobuz plugin (https://github.com/LMS-Community/plugin-Qobuz) is a great tool for exploring new music. What I was missing was access to a defined collection of albums, for hearing my music on Qobuz, not seeing each album of an artist. Inspired by my old vinyl lp collection, I would like to access my music by genre -> artist -> album or artist-> album.
 
@@ -25,14 +35,14 @@ The 'MyQobuz' plugin is available on the Settings page of the LMS in the section
 !['MyQobuz' activation](assets/settings.png "Enable 'MyQobuz'")
 
 After activation, you will find 'MyQobuz' in the 'Active plugin' section and you can navigate to the settings page:
-!['MyQobuz' settings](assets/IMG_0054.PNG "'MyQobuz' settings")
+!['MyQobuz' settings](assets/IMG_0054_2.jpeg "'MyQobuz' settings")
 
 ### Selecting an Album from 'MyQobuz'
 The entrance to the 'MyQobuz' section can be found in the application view of the LMS:
 ![LMS applications view](assets/IMG_0040.PNG "Entry point for 'MyQobuz'")
 
-The 'MyQobuz' section allows access to the defined albums of 'MyQobuz' via genre-artist-album , artist-album, tag-artist-album, or tag-genre-artist-album. Also, the last imported albums can be visited and the import of the 'Qobuz* favorites can be triggered:
-!['MyQobuz' view](assets/IMG_0041.PNG "'MyQobuz' menu")
+The 'MyQobuz' section allows access to the defined albums of 'MyQobuz' via genre-artist-album , artist-album, tag-artist-album, or tag-genre-artist-album. Also, the last imported albums can be visited. Import of the all 'Qobuz* favorites can be triggered and also all albums of 'MyQobuz' can be exported to 'Qobuz' favorites:
+!['MyQobuz' view](assets/IMG_0041_2.jpeg "'MyQobuz' menu")
 
 Using the tag e.g. 'lp', which means the album is also available as vinyl lp (in my home collection), is shown in the next screens:
 !['MyQobuz' tags](assets/use_tag2.PNG "Using a tag")
