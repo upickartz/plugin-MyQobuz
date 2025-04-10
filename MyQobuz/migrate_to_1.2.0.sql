@@ -1,6 +1,6 @@
 # change  unique constraint tag
 CREATE TABLE tag_copy ( id INTEGER PRIMARY KEY,
-                        name TEXT NOT NULL UNIQUE, 
+                        name TEXT NOT NULL, 
                         group_name TEXT DEFAULT '#no_group#' NOT NULL,
                         UNIQUE(name,group_name));
 INSERT INTO tag_copy SELECT * FROM tag;
