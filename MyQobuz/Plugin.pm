@@ -196,7 +196,7 @@ sub trackInfoMenu {
 	};
 
 	my $menu;
-	if ( scalar @$items == 1) {
+	if ( $items && (scalar @$items == 1) ) {
 			$menu = $items->[0];
 			$menu->{name} = cstring($client, 'PLUGIN_ON_MY_QOBUZ');
 	}

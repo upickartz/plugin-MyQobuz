@@ -26,6 +26,7 @@ use Slim::Utils::Log;
 
 use Plugins::MyQobuz::MyQobuzDB;
 
+# require Data::Dump;
  
 my $log = logger('plugin.myqobuz');
 
@@ -68,11 +69,19 @@ sub MyLatestAlbums {
 	my ($client, $cb, $params, $args) = @_;
 
 	my $myLatestAlbums = Plugins::MyQobuz::MyQobuzDB->getInstance()->getLatestAlbums();
+	my $api = Plugins::Qobuz::Plugin::getAPIHandler($client);
 	my @myArtists;
+	my @albums;
 	my @data;
 	my $item;
 	foreach my $album (@{$myLatestAlbums})
 	{
+		# store album
+		# $log->error("Hugo MyLatestAlbum id " .  Data::Dump::dump($album->{id}));
+		$api->getAlbum(sub {
+						my $album = shift;
+						push @albums, Plugins::Qobuz::Plugin->_albumItem($album);	
+					},$album->{id});
 		undef $item;
 		# check if artist already in array
 		foreach (@data){
@@ -96,6 +105,13 @@ sub MyLatestAlbums {
 	foreach (@data){
 		push @myArtists, _myArtistItem($client, $_->{artist_id}, $_->{artist_name}, $_->{album_filter});
 	}
+	# add entry for all albums
+	if (@albums) {
+		push  @myArtists, { name  => cstring($client, 'ALBUMS'), 
+							image => 'html/images/albums.png',
+							items => \@albums};
+	}
+
 	$cb->({
 			items => \@myArtists
 		});
