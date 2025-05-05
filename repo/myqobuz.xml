@@ -3,14 +3,14 @@
     <title lang="EN">MyQobuz LMS Plugin</title>
   </details>
   <plugins>
-    <plugin maxTarget="*" minTarget="7.8" name="MyQobuz" version="1.1.0">
+    <plugin maxTarget="*" minTarget="7.8" name="MyQobuz" version="1.2.0">
       <creator>Ulrich Pickartz</creator>
       <desc lang="EN">MyQobuz view to Qobuz</desc>
       <email>ulrich.pickartz@pickartz.me</email>
       <link>https://github.com/upickartz/plugin-MyQobuz</link>
-      <sha>633abcb6520ae7432a1ce82397f1715d2c7e3639</sha>
+      <sha>96dc6525e311d74b91b93d59ce52a2d1bfee7ee2</sha>
       <title lang="EN">MyQobuz Extensions</title>
-      <url>https://raw.githubusercontent.com/upickartz/plugin-MyQobuz/main/repo/release/1.1.0/MyQobuz.zip</url>
+      <url>https://raw.githubusercontent.com/upickartz/plugin-MyQobuz/main/repo/release/1.2.0/MyQobuz.zip</url>
     </plugin>
   </plugins>
 </extensions>
