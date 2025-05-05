@@ -71,6 +71,7 @@ use Plugins::Qobuz::API;
     my $_sth_albums_with_artist_and_genre;
     my $_sth_albums_with_artist_and_tag;
     my $_sth_albums_with_artist_and_genre_and_tag;
+    my $_sth_albums_with_tag;
 
     my $_sth_album_latest;
       
@@ -233,6 +234,7 @@ sub init {
         $_sth_tags                  = $_dbh->prepare("SELECT id,name FROM tag;");
         $_sth_genres                = $_dbh->prepare("SELECT DISTINCT genre FROM album;");
         $_sth_album                 = $_dbh->prepare("SELECT id,name,artist FROM album WHERE id = ?;");
+        $_sth_albums_with_tag       = $_dbh->prepare("SELECT album FROM album_tag WHERE tag = ?;");
 
         my $albumLatest = q/
         SELECT 
@@ -677,6 +679,25 @@ sub getAlbums {
             };
            
             foreach (@{$listOfList}) { push(@{$albumIds}, $_->[0]) };            
+        };
+        if ($@){
+            $@ && $log->error($@);
+        }
+        return $albumIds;
+}
+
+sub getAlbumsWithTag {
+        my $class = shift;
+        my $tag = shift;
+        local $@;
+        my $albumIds = [];
+        my $listOfList;
+        eval {
+            if (defined $tag){
+                   $_sth_albums_with_tag->execute($tag);
+                   $listOfList = $_sth_albums_with_tag->fetchall_arrayref();
+                   foreach (@{$listOfList}) { push(@{$albumIds}, $_->[0]) };            
+            };
         };
         if ($@){
             $@ && $log->error($@);

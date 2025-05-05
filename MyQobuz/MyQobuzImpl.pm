@@ -238,6 +238,13 @@ sub MyQobuzWithTag {
 			passthrough => [{
 					tagId => $tagId
 			}],
+		},
+		{
+			name => cstring($client, 'ALBUMS'),
+			url  => \&MyQobuzAlbumsWithTag,
+			passthrough => [{
+					tagId => $tagId
+			}],
 		}
 	];
 	$cb->({
@@ -246,6 +253,28 @@ sub MyQobuzWithTag {
 
 }
 
+sub MyQobuzAlbumsWithTag {
+	my ($client, $cb, $params, $args) = @_;
+
+	my $api = Plugins::Qobuz::Plugin::getAPIHandler($client);
+	my $tagId = $args->{tagId};
+	$log->info("MyQobuzImpl::MyQobuzAlbumsWithTag  called with tagId:  $tagId .");
+	my $albumIds = Plugins::MyQobuz::MyQobuzDB->getInstance()->getAlbumsWithTag($tagId);
+
+	my @albums = ();
+	foreach my $albumId (@{$albumIds})
+	{
+		# store album
+		# $log->error("Hugo MyQobuzAlbumsWithTag id " .  Data::Dump::dump($albumId));
+		$api->getAlbum(sub {
+						my $album = shift;
+						push @albums, Plugins::Qobuz::Plugin->_albumItem($album);	
+					},$albumId);
+	}
+	$cb->( {
+			items => \@albums
+		} );
+}
 
 sub MyQobuzSelectTag {
 	my ($client, $cb, $params, $args) = @_;
