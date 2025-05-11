@@ -28,6 +28,14 @@ use File::Basename;
 use File::Copy;
 
 use Plugins::Qobuz::API;
+use Plugins::MyQobuz::MyQobuzMigrate;
+
+# use XML::Simple qw(:strict);
+# use Slim::Utils::Prefs;
+
+
+
+require Data::Dump;
 
     my $log = logger('plugin.myqobuz');
 
@@ -74,8 +82,40 @@ use Plugins::Qobuz::API;
     my $_sth_albums_with_tag;
 
     my $_sth_album_latest;
-      
- 
+
+## working but not used      
+# sub getVersion() {
+#     my $prefs = preferences('server');
+#     #get install version
+#     my $installFile = $prefs->get('cachedir') . '/InstalledPlugins/Plugins/MyQobuz/install.xml';
+#     $log->error("Hugo getVersion()" .  Data::Dump::dump($installFile));
+#     my $ref = XMLin($installFile,
+# 			KeyAttr    => [],
+# 			ForceArray => [ ],
+# 		);
+#     return $ref->{version};
+# }
+
+sub exist_mig_version 
+{
+    my $mig_version = shift;
+    my $rv = 0;
+     
+    local $@;
+        eval{
+            my $sth = $_dbh->prepare('SELECT version FROM mig_version where version = ?');
+            $sth->execute($mig_version);
+            $rv = $sth->fetchrow_array();
+            $_dbh->commit();
+        };
+        if ($@){
+            $@ && $log->error($@);
+        }
+        return $rv;
+}
+
+
+
 sub db_error {
         my $error = shift;
         if (
@@ -104,11 +144,16 @@ sub createDB {
         image TEXT,
         genre TEXT, 
         qobuzGenre TEXT,                
-        artist INTEGER);
+        artist INTEGER,
+        year INTEGER DEFAULT NULL,
+        label TEXT DEFAULT NULL);
         /;
         $_dbh->do($albumCreate);
         $_dbh->do('CREATE INDEX index_genre ON album (genre);');
         $_dbh->do('CREATE INDEX index_artist ON album (artist);');
+        $_dbh->do('CREATE INDEX index_year ON album (year);');
+        $_dbh->do('CREATE INDEX index_label ON album (label);');
+        
         my $trackCreate = q/
         CREATE TABLE track (
         id TEXT PRIMARY KEY,
@@ -121,11 +166,37 @@ sub createDB {
         /;
         $_dbh->do($trackCreate);
         $_dbh->do('CREATE INDEX index_album ON track (album);');
-
-        $_dbh->do('CREATE TABLE tag (id INTEGER PRIMARY KEY,name TEXT NOT NULL UNIQUE,group_name TEXT DEFAULT "#no_group#" NOT NULL);');
+        my $tagCreate = q/
+        CREATE TABLE tag ( id INTEGER PRIMARY KEY,
+                            name TEXT NOT NULL, 
+                            group_name TEXT DEFAULT '\#no_group\#' NOT NULL,
+                            UNIQUE(name,group_name));
+        /;
+        $_dbh->do($tagCreate);
         $_dbh->do('CREATE TABLE album_tag (album TEXT,tag INTEGER,PRIMARY KEY (album,tag));');
         $_dbh->do('CREATE INDEX index_album_tag ON album_tag (album);');
         $_dbh->do('CREATE INDEX index_tag_album ON album_tag (tag);');
+        # to store album artist relation
+        $_dbh->do('CREATE TABLE artist_album (artist TEXT,album TEXT,PRIMARY KEY (artist,album));');
+        $_dbh->do('CREATE INDEX index_artist_album_artist ON artist_album (artist);');
+        $_dbh->do('CREATE INDEX index_artist_album_album ON artist_album (album);');
+        # to store goodies from qobuz
+        my $goodyTable = q/
+        CREATE TABLE goody (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                        album TEXT,
+                                        description TEXT,
+                                        file_format_id INTEGER,
+                                        name TEXT,
+                                        original_url TEXT,
+                                        url TEXT);
+        /;
+        $_dbh->do($goodyTable);
+        $_dbh->do('CREATE INDEX index_goody_album ON goody (album);');
+        #version table
+        $_dbh->do('CREATE TABLE mig_version (version TEXT,PRIMARY KEY (version));');
+        $_dbh->commit();
+        Plugins::MyQobuz::MyQobuzMigrate::insert_mig_version($_dbh,"1.3.0");
+
 }
 
 sub getDbPath {
@@ -173,6 +244,7 @@ sub getDbPath {
  
 }
 
+
 sub init {
         my $class = shift;
         $log->info("MyQobuz init DB");
@@ -184,18 +256,22 @@ sub init {
             $_dbh = DBI->connect("dbi:SQLite:dbname=$db_path","","",{sqlite_unicode => 1,AutoCommit=>0,RaiseError=>1,HandleError=>\&db_error });    
             createDB();
             $_dbh->commit();
-	    }else{
+        }else{
             # make backup db 
             my $backup_path = $db_path . ".backup";
             copy($db_path,$backup_path) or $log->error("Backup failed with db_path:  $db_path");
-	        if (-e $backup_path) {
+            if (-e $backup_path) {
                 $log->info("MyQobuzDB::initBackup created:  $backup_path");
             }
             #only connect to database
             $_dbh = DBI->connect("dbi:SQLite:dbname=$db_path","","",{sqlite_unicode => 1,AutoCommit=>0,RaiseError=>1,HandleError=>\&db_error });    
+            if ( ! exist_mig_version("1.3.0") ) {
+            $log->info("init: mig ro 1.3.0 required");
+            Plugins::MyQobuz::MyQobuzMigrate::migrate_1_3_0($_dbh);
+            }  
             #$_dbh->do("PRAGMA foreign_keys = ON");
         }
-       
+
         # prepare insert statements
         #artist
         $_sth_insert_artist = $_dbh->prepare("INSERT INTO artist (id,name,image) VALUES (?, ?, ?);");
