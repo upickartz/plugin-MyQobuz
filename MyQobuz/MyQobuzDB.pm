@@ -51,6 +51,7 @@ require Data::Dump;
     my $_sth_insert_tag;
     my $_sth_change_album_genre;
     my $_sth_insert_album_tag;
+    my $_sth_insert_goody;
 
     my $_sth_delete_artist;
     my $_sth_delete_album;
@@ -292,6 +293,12 @@ sub init {
         $_sth_insert_artist_album = $_dbh->prepare("INSERT INTO artist_album (artist,album,role) VALUES (?,?,?);");
         #genre
         $_sth_change_album_genre = $_dbh->prepare("UPDATE album SET genre = ? WHERE id = ?;");
+        #goody
+        my $goody_sql = q/
+            INSERT INTO goody (album,description,file_format_id,name,original_url,url) 
+            VALUES (?,?,?,?,?,?);
+        /;
+        $_sth_insert_goody = $_dbh->prepare($goody_sql);
         
         # prepare delete statements
         #artist
@@ -597,6 +604,18 @@ sub insertAlbum {
                 foreach my $role (@{$roles}){
                     $_sth_insert_artist_album->execute($item->{id},$album->{id},$role);
                 }
+            }
+            # insert goodies
+            my $goodies = $album->{goodies};
+            foreach my $goody (@{$goodies}){
+                $_sth_insert_goody->execute(
+                $album->{id},
+                $goody->{description},
+                $goody->{file_format_id},
+                $goody->{name},
+                $goody->{original_url},
+                $goody->{url}
+                );
             }
             # insert tracks
             foreach my $track (@{$album->{tracks}->{items}}) {
