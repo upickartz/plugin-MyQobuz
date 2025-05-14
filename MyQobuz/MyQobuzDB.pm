@@ -167,6 +167,7 @@ sub createDB {
         name  TEXT,
         duration INTEGER,
         url TEXT,
+        composer INTEGER, 
         performers TEXT,             
         album TEXT);
         /;
@@ -283,8 +284,8 @@ sub init {
         $_sth_insert_artist = $_dbh->prepare("INSERT INTO artist (id,name,image) VALUES (?, ?, ?);");
         #album
         $_sth_insert_album = $_dbh->prepare("INSERT INTO album (id,name,genre, qobuzGenre, image, artist, year, label) VALUES (?, ?, ?, ?, ?, ?, ?, ?);");
-        #album
-        $_sth_insert_track = $_dbh->prepare("INSERT INTO track (id,no,name,duration,url,album, exclude) VALUES (?, ?, ?, ?, ?, ?, 0);");
+        #track
+        $_sth_insert_track = $_dbh->prepare("INSERT INTO track (id,no,name,duration,url,album,composer,performers, exclude) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);");
         #tag
         $_sth_insert_tag = $_dbh->prepare("INSERT INTO tag (name) VALUES (?);");
         #tag
@@ -575,15 +576,19 @@ sub _existAlbumWithTag {
          return $count;
 }
 
+sub _insertArtist {
+    my $artistId = shift;
+    my $artistName = shift;
+    my $image =  Plugins::Qobuz::API->getArtistPicture($artistId) || 'html/images/artists.png';
+    $_sth_insert_artist->execute($artistId,$artistName,$image);
+}
 sub insertAlbum {
         my $class = shift;
         my $album = shift;
         local $@;
         eval {
             # insert artist
-            my $artistId = $album->{artist}->{id};
-            my $image =  Plugins::Qobuz::API->getArtistPicture($artistId) || 'html/images/artists.png';
-            $_sth_insert_artist->execute($artistId,$album->{artist}->{name},$image);
+            _insertArtist($album->{artist}->{id},$album->{artist}->{name});
             # insert album     
             my $year = substr($album->{release_date_stream},0,4) + 0;  
             $_sth_insert_album->execute($album->{id},
@@ -598,8 +603,7 @@ sub insertAlbum {
             #insert artist album relation
             my $artists = $album->{artists};
             foreach my $item (@{$artists}){
-                $image =  Plugins::Qobuz::API->getArtistPicture($item->{id}) || 'html/images/artists.png';
-                $_sth_insert_artist->execute($item->{id},$item->{name},$image);
+                _insertArtist($item->{id},$item->{name});
                 my $roles = $item->{roles}; 
                 foreach my $role (@{$roles}){
                     $_sth_insert_artist_album->execute($item->{id},$album->{id},$role);
@@ -619,11 +623,22 @@ sub insertAlbum {
             }
             # insert tracks
             foreach my $track (@{$album->{tracks}->{items}}) {
-                # (id,no,name,duration,url,album)
-			    #$totalDuration += $track->{duration};
-			    #my $formattedTrack = _trackItem($client, $track);
+                my $composerId = undef;
+                if ($track->{composer}){
+                    $composerId = $track->{composer}->{id};
+                    _insertArtist($composerId,$track->{composer}->{name});
+                }
+                #(id,no,name,duration,url,album,composer,performers, exclude)
                 my $url = Plugins::Qobuz::API::Common->getUrl(undef,$track);
-                $_sth_insert_track->execute($track->{id},$track->{track_number},$track->{title},$track->{duration},$url,$album->{id});
+                $_sth_insert_track->execute($track->{id},
+                                            $track->{track_number},
+                                            $track->{title},
+                                            $track->{duration},
+                                            $url,
+                                            $album->{id},
+                                            $composerId,
+                                            $track->{performers},
+                                            0);
             }
             # commit
             $_dbh->commit();
