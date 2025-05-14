@@ -60,8 +60,10 @@ sub migrate_1_3_0 {
         $_dbh->do("CREATE INDEX index_year ON album (year);");
         $_dbh->do("CREATE INDEX index_label ON album (label);");
         $_dbh->commit();
+        #change track 
+        $_dbh->do("ALTER TABLE track add column  performers TEXT DEFAULT NULL ;");
         # to store album artist relation
-        $_dbh->do("CREATE TABLE IF NOT EXISTS artist_album (artist TEXT,album TEXT,PRIMARY KEY (artist,album));");
+        $_dbh->do("CREATE TABLE IF NOT EXISTS artist_album (artist TEXT,album TEXT,role TEXT,PRIMARY KEY (artist,album));");
         $_dbh->do("CREATE INDEX index_artist_album_artist ON artist_album (artist);");
         $_dbh->do("CREATE INDEX index_artist_album_album ON artist_album (album);");
         $_dbh->commit();

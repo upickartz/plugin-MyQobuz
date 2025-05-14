@@ -54,12 +54,15 @@ require Data::Dump;
 
     my $_sth_delete_artist;
     my $_sth_delete_album;
+    my $_sth_cleanup_artist_album;
     my $_sth_delete_album_tracks;
     my $_sth_delete_tag;
     my $_sth_delete_album_tag;
+    my $_sth_delete_artist_album;
     
 
     my $_sth_exist_album_with_artist;
+    my $_sth_exist_artist_album_with_artist;
     my $_sth_exist_album_with_tag;
     my $_sth_all_albums_with_artist;
 
@@ -67,6 +70,7 @@ require Data::Dump;
     my $_sth_artists_with_tag;
     my $_sth_artists_with_genre;
     my $_sth_artists_with_genre_tag;
+    my $_sth_insert_artist_album;
 
     my $_sth_genres;
     my $_sth_genres_with_tag;
@@ -100,7 +104,7 @@ sub exist_mig_version
 {
     my $mig_version = shift;
     my $rv = 0;
-     
+
     local $@;
         eval{
             my $sth = $_dbh->prepare('SELECT version FROM mig_version where version = ?');
@@ -161,7 +165,8 @@ sub createDB {
         exclude INTEGER,
         name  TEXT,
         duration INTEGER,
-        url TEXT,             
+        url TEXT,
+        performers TEXT,             
         album TEXT);
         /;
         $_dbh->do($trackCreate);
@@ -177,7 +182,7 @@ sub createDB {
         $_dbh->do('CREATE INDEX index_album_tag ON album_tag (album);');
         $_dbh->do('CREATE INDEX index_tag_album ON album_tag (tag);');
         # to store album artist relation
-        $_dbh->do('CREATE TABLE artist_album (artist TEXT,album TEXT,PRIMARY KEY (artist,album));');
+        $_dbh->do('CREATE TABLE artist_album (artist TEXT,album TEXT,role TEXT,PRIMARY KEY (artist,album));');
         $_dbh->do('CREATE INDEX index_artist_album_artist ON artist_album (artist);');
         $_dbh->do('CREATE INDEX index_artist_album_album ON artist_album (album);');
         # to store goodies from qobuz
@@ -276,21 +281,32 @@ sub init {
         #artist
         $_sth_insert_artist = $_dbh->prepare("INSERT INTO artist (id,name,image) VALUES (?, ?, ?);");
         #album
-        $_sth_insert_album = $_dbh->prepare("INSERT INTO album (id,name,genre, qobuzGenre, image, artist) VALUES (?, ?, ?, ?, ?, ?);");
+        $_sth_insert_album = $_dbh->prepare("INSERT INTO album (id,name,genre, qobuzGenre, image, artist, year, label) VALUES (?, ?, ?, ?, ?, ?, ?, ?);");
         #album
         $_sth_insert_track = $_dbh->prepare("INSERT INTO track (id,no,name,duration,url,album, exclude) VALUES (?, ?, ?, ?, ?, ?, 0);");
         #tag
         $_sth_insert_tag = $_dbh->prepare("INSERT INTO tag (name) VALUES (?);");
-         #tag
+        #tag
         $_sth_insert_album_tag = $_dbh->prepare("INSERT INTO album_tag (album,tag) VALUES (?,?);");
+        #artist_album
+        $_sth_insert_artist_album = $_dbh->prepare("INSERT INTO artist_album (artist,album,role) VALUES (?,?,?);");
         #genre
         $_sth_change_album_genre = $_dbh->prepare("UPDATE album SET genre = ? WHERE id = ?;");
         
         # prepare delete statements
         #artist
         $_sth_delete_artist = $_dbh->prepare("DELETE FROM artist WHERE id = ?;");
+         my $cleanup_sql = q/
+            DELETE FROM artist WHERE artist.id IN 
+                (SELECT  a.id FROM artist as a 
+                    LEFT JOIN artist_album as aa ON a.id = aa.artist 
+                    WHERE aa.album IS NULL);
+        /;
+        $_sth_cleanup_artist_album =  $_dbh->prepare($cleanup_sql);
+        
         #album
         $_sth_delete_album = $_dbh->prepare("DELETE FROM album WHERE id = ?;");
+        $_sth_delete_artist_album = $_dbh->prepare("DELETE FROM artist_album WHERE album = ?;");
         #tracks
         $_sth_delete_album_tracks = $_dbh->prepare("DELETE FROM track WHERE album = ?;");
         #tag
@@ -300,6 +316,7 @@ sub init {
 
         # prepare exist query statements (foreign key constraints are not working)
         $_sth_exist_album_with_artist = $_dbh->prepare("SELECT count(*) FROM album WHERE artist = ?;");
+        $_sth_exist_artist_album_with_artist = $_dbh->prepare("SELECT count(*) FROM artist_album WHERE artist = ?;");
         $_sth_exist_album_with_tag =  $_dbh->prepare("SELECT count(*) FROM album_tag WHERE tag = ?;");
         
 
@@ -534,11 +551,13 @@ sub getMyAlbum {
 }
 
 sub _existAlbumWithArtist {
-         my $class = shift;
-         my $artist = shift;
-         $_sth_exist_album_with_artist->execute($artist);
-         my $count = $_sth_exist_album_with_artist->fetchrow_array();
-         return $count;
+        my $class = shift;
+        my $artist = shift;
+        $_sth_exist_album_with_artist->execute($artist);
+        my $count1 = $_sth_exist_album_with_artist->fetchrow_array();
+        $_sth_exist_artist_album_with_artist->execute($artist);
+        my $count2 = $_sth_exist_artist_album_with_artist->fetchrow_array();
+        return $count1 + $count2;
 }
 
 sub _existAlbumWithTag {
@@ -558,9 +577,27 @@ sub insertAlbum {
             my $artistId = $album->{artist}->{id};
             my $image =  Plugins::Qobuz::API->getArtistPicture($artistId) || 'html/images/artists.png';
             $_sth_insert_artist->execute($artistId,$album->{artist}->{name},$image);
-            # insert album       
-            $_sth_insert_album->execute($album->{id},$album->{title},$album->{genre},$album->{genre},$album->{image},$album->{artist}->{id});
-            
+            # insert album     
+            my $year = substr($album->{release_date_stream},0,4) + 0;  
+            $_sth_insert_album->execute($album->{id},
+                $album->{title},
+                $album->{genre},
+                $album->{genre},
+                $album->{image},
+                $album->{artist}->{id},
+                $year,
+                $album->{label}->{name}
+                );
+            #insert artist album relation
+            my $artists = $album->{artists};
+            foreach my $item (@{$artists}){
+                $image =  Plugins::Qobuz::API->getArtistPicture($item->{id}) || 'html/images/artists.png';
+                $_sth_insert_artist->execute($item->{id},$item->{name},$image);
+                my $roles = $item->{roles}; 
+                foreach my $role (@{$roles}){
+                    $_sth_insert_artist_album->execute($item->{id},$album->{id},$role);
+                }
+            }
             # insert tracks
             foreach my $track (@{$album->{tracks}->{items}}) {
                 # (id,no,name,duration,url,album)
@@ -685,12 +722,15 @@ sub removeAlbum {
                 #delete album_tag
                 $class->removeTag($albumId,$key);
             }
+            #remove artist_album relation
+            $_sth_delete_artist_album->execute($albumId);
             #clean up artist if required
             if (not $class->_existAlbumWithArtist($artistId)){
                 # remove artist
                 $_sth_delete_artist->execute($artistId);
             }
-                
+            # clean up artists by artist_album table
+            $_sth_cleanup_artist_album->execute();
             # commit
             $_dbh->commit();
         };
