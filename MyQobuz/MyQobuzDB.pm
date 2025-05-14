@@ -68,6 +68,7 @@ require Data::Dump;
     my $_sth_all_albums_with_artist;
 
     my $_sth_artists;
+    my $_sth_artists_with_album;
     my $_sth_artists_with_tag;
     my $_sth_artists_with_genre;
     my $_sth_artists_with_genre_tag;
@@ -439,6 +440,16 @@ sub init {
         ORDER BY artist.name;
         /;
         $_sth_artists_with_tag = $_dbh->prepare($artistWithTagSql);
+
+        my $artistWithAlbumSql = q/
+        SELECT DISTINCT 
+        artist.id,
+        artist.name  
+        FROM album  
+        INNER JOIN artist ON album.artist = artist.id 
+        ORDER BY artist.name;
+        /;
+        $_sth_artists_with_album = $_dbh->prepare($artistWithAlbumSql);
         
         my $artistWithGenreTagSql = q/
         SELECT DISTINCT 
@@ -919,8 +930,8 @@ sub getArtists {
                 $_sth_artists_with_tag->execute($tagId);
                 $listOfArtists = $_sth_artists_with_tag->fetchall_arrayref();
             }else{
-                $_sth_artists->execute();
-                $listOfArtists = $_sth_artists->fetchall_arrayref();
+                $_sth_artists_with_album->execute();
+                $listOfArtists = $_sth_artists_with_album->fetchall_arrayref();
             }
 
             foreach (@{$listOfArtists}) { 
