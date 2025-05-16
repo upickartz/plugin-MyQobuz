@@ -167,6 +167,27 @@ sub MyQobuzArtist {
 	}, $artistId);
 }
 	
+sub MyQobuzComposers {
+	my ($client, $cb, $params, $args) = @_;
+	my $genre = $args->{genre} || '';
+	my $composers = Plugins::MyQobuz::MyQobuzDB->getInstance()->getComposers($genre);
+	my @myComposers;
+	foreach my $composer ( sort {
+			Slim::Utils::Text::ignoreCaseArticles($a->{name}) cmp Slim::Utils::Text::ignoreCaseArticles($b->{name})
+		}
+		@$composers) {
+		my $composertId = $composer->{id};
+		my $composertName = $composer->{name};
+		my $albumFilter = Plugins::MyQobuz::MyQobuzDB->getInstance()->getAlbumsWithComposer($composertId,$genre); 
+		push @myComposers, _myArtistItem($client, $composertId, $composertName, $albumFilter);
+	};
+	$cb->({
+			items => \@myComposers
+		});
+	
+
+}	
+
 sub MyQobuzArtists {
 	my ($client, $cb, $params, $args) = @_;
 
@@ -191,11 +212,19 @@ sub MyQobuzArtists {
 
 sub MyQobuzGenre {
 	my ($client, $cb, $params, $args) = @_;
-
-	my @myArtists;
 	my $genre = $args->{genre} || '';
 	my $tagId = $args->{tagId};
 	$log->info("MyQobuzImpl::MyQobuzGenre  called with tagId:  $tagId and genre:  $genre .");
+	
+	my @myArtists;
+	push @myArtists, {
+			name => cstring($client, 'PLUGIN_MY_QOBUZ_COMPOSER'),
+			url  => \&Plugins::MyQobuz::MyQobuzImpl::MyQobuzComposers,
+			passthrough => [{
+					genre => $genre
+				}],
+			image => 'html/images/artists.png',
+		};
 	my $artists = Plugins::MyQobuz::MyQobuzDB->getInstance()->getArtistsWithGenre($genre,$tagId);
 	foreach my $artist (sort {
 			Slim::Utils::Text::ignoreCaseArticles($a->{name}) cmp Slim::Utils::Text::ignoreCaseArticles($b->{name})
@@ -204,10 +233,11 @@ sub MyQobuzGenre {
 		my $artistName = $artist->{name};
 		my $albumFilter = Plugins::MyQobuz::MyQobuzDB->getInstance()->getAlbums($artistId,$genre,$tagId);
 		push @myArtists, _myArtistItem($client, $artistId, $artistName, $albumFilter);
-	};	
+	};
+			
 	$cb->({
 			items => \@myArtists
-		});
+	});
 }
 
 

@@ -127,6 +127,11 @@ sub handleFeed {
 			image => 'html/images/artists.png',
 		},
 		{
+			name => cstring($client, 'PLUGIN_MY_QOBUZ_COMPOSER'),
+			url  => \&Plugins::MyQobuz::MyQobuzImpl::MyQobuzComposers,
+			image => 'html/images/artists.png',
+		},
+		{
 				name  => cstring($client, 'PLUGIN_MY_QOBUZ_SELECT_TAG'),
 				url  => \&Plugins::MyQobuz::MyQobuzImpl::MyQobuzSelectTag,
 				image => 'plugins/MyQobuz/html/images/tag.png'

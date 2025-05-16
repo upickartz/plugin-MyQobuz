@@ -69,9 +69,11 @@ require Data::Dump;
 
     my $_sth_artists;
     my $_sth_artists_with_album;
+    my $_sth_composer;
     my $_sth_artists_with_tag;
     my $_sth_artists_with_genre;
     my $_sth_artists_with_genre_tag;
+    my $_sth_composer_with_genre;
     my $_sth_insert_artist_album;
 
     my $_sth_genres;
@@ -86,6 +88,8 @@ require Data::Dump;
     my $_sth_albums_with_artist_and_tag;
     my $_sth_albums_with_artist_and_genre_and_tag;
     my $_sth_albums_with_tag;
+    my $_sth_albums_with_composer;
+    my $_sth_albums_with_composer_and_genre;
 
     my $_sth_album_latest;
 
@@ -337,6 +341,14 @@ sub init {
         $_sth_genres                = $_dbh->prepare("SELECT DISTINCT genre FROM album;");
         $_sth_album                 = $_dbh->prepare("SELECT id,name,artist FROM album WHERE id = ?;");
         $_sth_albums_with_tag       = $_dbh->prepare("SELECT album FROM album_tag WHERE tag = ?;");
+        $_sth_albums_with_composer  = $_dbh->prepare("SELECT DISTINCT  a.id  FROM track as t  INNER JOIN album as a ON t.album = a.id WHERE t.composer = ?;");
+        my $albumComposerAndGenre = q/
+            SELECT DISTINCT  a.id  
+            FROM track as t  
+            INNER JOIN album as a ON t.album = a.id 
+            WHERE t.composer = ? and A.GENRE = ?;
+        /;
+        $_sth_albums_with_composer_and_genre = $_dbh->prepare($albumComposerAndGenre);
 
         my $albumLatest = q/
         SELECT 
@@ -450,7 +462,27 @@ sub init {
         ORDER BY artist.name;
         /;
         $_sth_artists_with_album = $_dbh->prepare($artistWithAlbumSql);
-        
+        my $composerWithAlbumSql = q/
+            SELECT DISTINCT ar.id, ar.name FROM track as t 
+                INNER JOIN album a on t.album = a.id  
+                INNER JOIN artist as ar on ar.id = t.composer 
+            WHERE t.composer NOT NULL;
+        /;
+        $_sth_composer = $_dbh->prepare($composerWithAlbumSql);
+
+        my $composerWithGenreSql = q/
+        SELECT DISTINCT
+            ar.id,
+            ar.name
+        FROM
+            track AS t
+            INNER JOIN album AS a ON t.album = a.id
+            INNER JOIN artist As ar ON ar.id = t.composer  
+        WHERE
+            a.genre = ? ;
+        /;
+        $_sth_composer_with_genre = $_dbh->prepare($composerWithGenreSql);
+
         my $artistWithGenreTagSql = q/
         SELECT DISTINCT 
         artist.id,
@@ -590,6 +622,13 @@ sub _existAlbumWithTag {
 sub _insertArtist {
     my $artistId = shift;
     my $artistName = shift;
+    # problem vanished:
+    # sqlite> select * from track where id = '318553286';
+    # 318553286|4|0|Chambermaid|203|qobuz://318553286.flac|26496545|Suzanne Vega, MainArtist - Gerry Leonard, Producer - “Chambermaid” is an adaptation of “I Want You” written by Bob Dylan. Additional lyrics by Suzanne Vega and additional music by Suzanne Vega and Gerry Leonard., Composer|irp1d41npgi1a
+    # sqlite> select * from album where id = 'irp1d41npgi1a';
+    # irp1d41npgi1a|2025-05-14 18:32:20|Flying with Angels|https://static.qobuz.com/images/covers/1a/gi/irp1d41npgi1a_600.jpg|Folk|Folk|36527|2025|Cooking Vinyl Limited
+    # wrong fix: ( no longer neccessary)
+    # my $encodedArtistName = utf8::decode($artistName); 
     my $image =  Plugins::Qobuz::API->getArtistPicture($artistId) || 'html/images/artists.png';
     $_sth_insert_artist->execute($artistId,$artistName,$image);
 }
@@ -636,7 +675,7 @@ sub insertAlbum {
             foreach my $track (@{$album->{tracks}->{items}}) {
                 my $composerId = undef;
                 if ($track->{composer}){
-                    $composerId = $track->{composer}->{id};
+                    $composerId = $track->{composer}->{id};                    
                     _insertArtist($composerId,$track->{composer}->{name});
                 }
                 #(id,no,name,duration,url,album,composer,performers, exclude)
@@ -866,6 +905,29 @@ sub getAlbumsWithTag {
         return $albumIds;
 }
 
+sub getAlbumsWithComposer {
+        my $class = shift;
+        my $composerId = shift;
+        my $genre = shift;
+        local $@;
+        my $albumIds = [];
+        my $listOfList;
+        eval {
+            if (defined $genre){
+                $_sth_albums_with_composer_and_genre->execute($composerId,$genre);
+                $listOfList = $_sth_albums_with_composer_and_genre->fetchall_arrayref();
+            }else{
+                $_sth_albums_with_composer->execute($composerId);
+                $listOfList = $_sth_albums_with_composer->fetchall_arrayref();            
+            };
+            foreach (@{$listOfList}) { push(@{$albumIds}, $_->[0]) };
+        };
+        if ($@){
+            $@ && $log->error($@);
+        }
+        return $albumIds;
+}
+
 
 sub getTags {
         my $class = shift;
@@ -917,9 +979,38 @@ sub getMyGenres {
         return $genres;
 }
 
+sub getComposers {
+    my $class = shift; 
+    my $genre = shift;
+
+    local $@;
+    my $composers = [];
+    eval{
+        my $listOfComposers;
+        if (defined $genre){
+            $_sth_composer_with_genre->execute($genre);
+            $listOfComposers = $_sth_composer_with_genre->fetchall_arrayref();
+        }else{
+            $_sth_composer->execute();
+            $listOfComposers = $_sth_composer->fetchall_arrayref();
+        }
+        # $log->error("Hugo getComposers  " .  Data::Dump::dump($listOfComposers));
+        foreach (@{$listOfComposers}) { 
+                my $hash = { id => $_->[0] , name =>  $_->[1] }; 
+                push ( @{$composers} , $hash); 
+            };
+    };
+    if ($@){
+        $@ && $log->error($@);
+    }
+    return $composers;
+
+}
+
 # returns list of artist hashes with id and name
 sub getArtists {
         my $class = shift;
+
         my $tagId = shift;
        
         local $@;

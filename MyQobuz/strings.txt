@@ -19,6 +19,10 @@ PLUGIN_MY_QOBUZ_GENRE
 PLUGIN_MY_QOBUZ_ARTIST
 	DE	Meine Künstler
 	EN	My Artists
+
+PLUGIN_MY_QOBUZ_COMPOSER
+	DE	Meine Komponisten
+	EN	My Composeres
 	
 PLUGIN_MY_QOBUZ_ALBUM
 	DE	Mein Qobuz: '%s' 
