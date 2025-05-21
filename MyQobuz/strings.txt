@@ -22,7 +22,7 @@ PLUGIN_MY_QOBUZ_ARTIST
 
 PLUGIN_MY_QOBUZ_COMPOSER
 	DE	Meine Komponisten
-	EN	My Composeres
+	EN	My Composers
 	
 PLUGIN_MY_QOBUZ_ALBUM
 	DE	Mein Qobuz: '%s' 

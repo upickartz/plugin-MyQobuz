@@ -121,6 +121,7 @@ sub MyQobuzArtist {
 	my ($client, $cb, $params, $args) = @_;
 
 	my $artistId = $args->{artistId};
+	my $isComposer = $args->{isComposer};
 	$log->info("MyQobuzArtist called with $artistId .");
 	my $myQobuzAlbumFilter = $args->{myQobuzAlbumFilter};
 	my $api = Plugins::Qobuz::Plugin::getAPIHandler($client);
@@ -131,16 +132,27 @@ sub MyQobuzArtist {
 			$cb->();
 			return;
 		}
-
-		my $items = [{
-			name  => cstring($client, 'ALBUMS'),
-			# sub itemes will be defined below
-			image => 'html/images/albums.png',
-		}];
-
+		my @albums;
+		foreach (@{$myQobuzAlbumFilter}){
+					$api->getAlbum(sub {
+						my $album = shift;
+						if ($isComposer){
+							push @albums,_albumItemWithComposer($client,$album,$artistId,$artist->{name});
+						}else{
+							push @albums, Plugins::Qobuz::Plugin->_albumItem($album);
+						}	
+					},$_);
+		};
+		my $items = [];
+		if (!$isComposer){
+			push  @{$items}, {
+				name  => cstring($client, 'ALBUMS'),
+				image => 'html/images/albums.png',
+			};
+		};
 		if ($artist->{biography}) {
 			my $images = $artist->{image} || {};
-			push @$items, {
+			push @{$items}, {
 				name  => cstring($client, 'PLUGIN_QOBUZ_BIOGRAPHY'),
 				# don#t use API because this should already be done
 				image => Plugins::Qobuz::API::Common->getImageFromImagesHash($images) || 'html/images/artists.png',
@@ -150,15 +162,14 @@ sub MyQobuzArtist {
 				}],
 			}
 		};
-		my @albums;
-		foreach (@{$myQobuzAlbumFilter}){
-					$api->getAlbum(sub {
-						my $album = shift;
-						push @albums, Plugins::Qobuz::Plugin->_albumItem($album);	
-					},$_);
-		};
 		if (@albums) {
+			if ($isComposer){
+				foreach (@albums){
+					push @{$items},$_; 
+				}
+			}else{
 				$items->[0]->{items} = \@albums;
+			}
 		}
 		$cb->( {
 			items => $items
@@ -169,7 +180,7 @@ sub MyQobuzArtist {
 	
 sub MyQobuzComposers {
 	my ($client, $cb, $params, $args) = @_;
-	my $genre = $args->{genre} || '';
+	my $genre = $args->{genre};
 	my $composers = Plugins::MyQobuz::MyQobuzDB->getInstance()->getComposers($genre);
 	my @myComposers;
 	foreach my $composer ( sort {
@@ -179,7 +190,7 @@ sub MyQobuzComposers {
 		my $composertId = $composer->{id};
 		my $composertName = $composer->{name};
 		my $albumFilter = Plugins::MyQobuz::MyQobuzDB->getInstance()->getAlbumsWithComposer($composertId,$genre); 
-		push @myComposers, _myArtistItem($client, $composertId, $composertName, $albumFilter);
+		push @myComposers, _myArtistItem($client, $composertId, $composertName, $albumFilter,1);
 	};
 	$cb->({
 			items => \@myComposers
@@ -386,13 +397,14 @@ sub MyQobuzDeletedAlbums {
 }
 
 sub _myArtistItem {
-	my ($client, $artistId, $artistName, $myQobuzAlbumFilter) = @_;
+	my ($client, $artistId, $artistName, $myQobuzAlbumFilter,$isComposer) = @_;
 	my $item = {
 		name  => $artistName,
 		url   => \&MyQobuzArtist,
 		passthrough => [{
 			artistId  => $artistId,
 			myQobuzAlbumFilter => $myQobuzAlbumFilter,
+			isComposer => $isComposer
 		}],
 	};
 	my $api = Plugins::Qobuz::Plugin::getAPIHandler($client);
@@ -606,6 +618,50 @@ sub QobuzExportToFavorites {
 			}] });
 			1;
 	}
+}
+
+sub MyQobuzGetComposerTracks {
+	my ($client, $cb, $params, $args) = @_;
+	my $albumId = $args->{album_id};
+	my $composerId = $args->{composer_id};
+	
+	my $api = Plugins::Qobuz::Plugin::getAPIHandler($client);
+	$api->getAlbum( sub {
+		my $album = shift;
+		if (!$album) {
+			$log->error("Get album ($albumId) failed");
+			return;
+		}
+		my $tracks = [];
+		foreach my $track (@{$album->{tracks}->{items}}) {
+			if ($track->{composer}->{id} == $composerId){
+				push @$tracks,  Plugins::Qobuz::Plugin->_trackItem($track);
+			}
+		}
+		$cb->({
+			items => $tracks,
+		}, @_ );
+
+	},
+	$albumId);
+}
+
+
+sub _albumItemWithComposer {
+	my ($client,$album,$composer,$composerName) = @_;
+	# $log->error("Hugo _albumItemWithComposer composer: " .  Data::Dump::dump($composer));
+	my $albumName = $album->{title} . "   [ " .  $composerName . " ]";
+	my $item = {
+		name  => $albumName,
+		url   => \&MyQobuzGetComposerTracks,
+		image => $album->{image},
+		passthrough => [{
+			composer_id => $composer,
+			album_id  => $album->{id},
+		}],
+	};
+	$item->{type}        = 'playlist';
+	return $item;
 }
 
 

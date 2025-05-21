@@ -620,15 +620,9 @@ sub _existAlbumWithTag {
 }
 
 sub _insertArtist {
+    my $class = shift;
     my $artistId = shift;
     my $artistName = shift;
-    # problem vanished:
-    # sqlite> select * from track where id = '318553286';
-    # 318553286|4|0|Chambermaid|203|qobuz://318553286.flac|26496545|Suzanne Vega, MainArtist - Gerry Leonard, Producer - “Chambermaid” is an adaptation of “I Want You” written by Bob Dylan. Additional lyrics by Suzanne Vega and additional music by Suzanne Vega and Gerry Leonard., Composer|irp1d41npgi1a
-    # sqlite> select * from album where id = 'irp1d41npgi1a';
-    # irp1d41npgi1a|2025-05-14 18:32:20|Flying with Angels|https://static.qobuz.com/images/covers/1a/gi/irp1d41npgi1a_600.jpg|Folk|Folk|36527|2025|Cooking Vinyl Limited
-    # wrong fix: ( no longer neccessary)
-    # my $encodedArtistName = utf8::decode($artistName); 
     my $image =  Plugins::Qobuz::API->getArtistPicture($artistId) || 'html/images/artists.png';
     $_sth_insert_artist->execute($artistId,$artistName,$image);
 }
@@ -638,7 +632,7 @@ sub insertAlbum {
         local $@;
         eval {
             # insert artist
-            _insertArtist($album->{artist}->{id},$album->{artist}->{name});
+            _insertArtist($class,$album->{artist}->{id},$album->{artist}->{name});
             # insert album     
             my $year = substr($album->{release_date_stream},0,4) + 0;  
             $_sth_insert_album->execute($album->{id},
@@ -653,7 +647,7 @@ sub insertAlbum {
             #insert artist album relation
             my $artists = $album->{artists};
             foreach my $item (@{$artists}){
-                _insertArtist($item->{id},$item->{name});
+                _insertArtist($class,$item->{id},$item->{name});
                 my $roles = $item->{roles}; 
                 foreach my $role (@{$roles}){
                     $_sth_insert_artist_album->execute($item->{id},$album->{id},$role);
@@ -676,7 +670,7 @@ sub insertAlbum {
                 my $composerId = undef;
                 if ($track->{composer}){
                     $composerId = $track->{composer}->{id};                    
-                    _insertArtist($composerId,$track->{composer}->{name});
+                    _insertArtist($class,$composerId,$track->{composer}->{name});
                 }
                 #(id,no,name,duration,url,album,composer,performers, exclude)
                 my $url = Plugins::Qobuz::API::Common->getUrl(undef,$track);
@@ -688,7 +682,7 @@ sub insertAlbum {
                                             $album->{id},
                                             $composerId,
                                             $track->{performers},
-                                            0);
+                                            0);                                           
             }
             # commit
             $_dbh->commit();
@@ -706,7 +700,7 @@ sub getTagId {
         $tag =~ s/^\s+//;
         $tag =~ s/\s+$//;
 
-         my $tag_id;
+        my $tag_id;
         local $@;
         eval{
             $_sth_tag_id->execute($tag);
@@ -994,7 +988,7 @@ sub getComposers {
             $_sth_composer->execute();
             $listOfComposers = $_sth_composer->fetchall_arrayref();
         }
-        # $log->error("Hugo getComposers  " .  Data::Dump::dump($listOfComposers));
+        
         foreach (@{$listOfComposers}) { 
                 my $hash = { id => $_->[0] , name =>  $_->[1] }; 
                 push ( @{$composers} , $hash); 
