@@ -29,6 +29,7 @@ use Plugins::MyQobuz::MyQobuzDB;
 # require Data::Dump;
  
 my $log = logger('plugin.myqobuz');
+my $prefs = preferences('plugin.myqobuz');
 
 # copy from Plugins::Qobuz::Plugin.pm 
 sub _stripHTML {
@@ -228,7 +229,8 @@ sub MyQobuzGenre {
 	$log->info("MyQobuzImpl::MyQobuzGenre  called with tagId:  $tagId and genre:  $genre .");
 	
 	my @myArtists;
-	push @myArtists, {
+	if ($prefs->enableGenreComposer){
+			push @myArtists, {
 			name => cstring($client, 'PLUGIN_MY_QOBUZ_COMPOSER'),
 			url  => \&Plugins::MyQobuz::MyQobuzImpl::MyQobuzComposers,
 			passthrough => [{
@@ -236,6 +238,7 @@ sub MyQobuzGenre {
 				}],
 			image => 'html/images/artists.png',
 		};
+	}
 	my $artists = Plugins::MyQobuz::MyQobuzDB->getInstance()->getArtistsWithGenre($genre,$tagId);
 	foreach my $artist (sort {
 			Slim::Utils::Text::ignoreCaseArticles($a->{name}) cmp Slim::Utils::Text::ignoreCaseArticles($b->{name})
@@ -541,7 +544,6 @@ sub QobuzRemoveTagFromMyQobuz {
 
 sub QobuzImportFavorites {
 	my ($client, $cb, $params, $args) = @_;
-	my $prefs = preferences('plugin.myqobuz');
 	my $delete_imported = $prefs->deleteFavoriteAfterImport;
 	my $api = Plugins::Qobuz::Plugin::getAPIHandler($client);
 	$api->getUserFavorites(sub {
@@ -588,7 +590,6 @@ sub QobuzImportFavorites {
 
 sub QobuzExportToFavorites {
 	my ($client, $cb, $params, $args) = @_;
-	my $prefs = preferences('plugin.myqobuz');
 	my $api = Plugins::Qobuz::Plugin::getAPIHandler($client);
 	eval {
 			my $myAlbums = Plugins::MyQobuz::MyQobuzDB->getInstance()->getAllAlbums();

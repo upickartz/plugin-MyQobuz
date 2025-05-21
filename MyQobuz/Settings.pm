@@ -38,7 +38,13 @@ sub page {
 }
 
 sub prefs {
-	return ($prefs,'enableDBConfig', 'enableFavoriteImport', 'enableFavoriteExport' ,'deleteFavoriteAfterImport', 'myQobuzDB');
+	return ($prefs,'enableDBConfig', 
+		'enableGenreComposer',
+		'enableComposer',
+		'enableFavoriteImport', 
+		'enableFavoriteExport' ,
+		'deleteFavoriteAfterImport', 
+		'myQobuzDB');
 }
 
 sub checkMyQobuzConfig {
@@ -65,6 +71,8 @@ sub handler {
 
 	if (  $params->{saveSettings} ) {
 		my $enableDBConfig = $prefs->enableDBConfig ;
+		$params->{'pref_enableComposer'} ||= 0;
+		$params->{'pref_enableGenreComposer'} ||= 0;
 		$params->{'pref_enableFavoriteImport'} ||= 0;
 		$params->{'pref_enableFavoriteExport'} ||= 0;
 		$params->{'pref_deleteFavoriteAfterImport'} ||= 0;

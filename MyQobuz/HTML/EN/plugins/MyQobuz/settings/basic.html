@@ -2,6 +2,14 @@
 [% PROCESS settings/header.html %]
 	[% WRAPPER settingSection %]	
 		[% WRAPPER settingGroup title="PLUGIN_SETTINGS_QOBUZ_FAVORITE" desc="" %]
+			<input type="checkbox" [% IF prefs.pref_enableComposer %]checked[% END %] class="stdedit" name="pref_enableComposer" id="pref_enableComposer" value="1" />
+			<label for="pref_enableComposer" class="stdlabel">[% "PLUGIN_SETTINGS_COMPOSER" | string %]</label>
+		[% END %]
+		[% WRAPPER settingGroup title="PLUGIN_SETTINGS_QOBUZ_FAVORITE" desc="" %]
+			<input type="checkbox" [% IF prefs.pref_enableGenreComposer %]checked[% END %] class="stdedit" name="pref_enableGenreComposer" id="pref_enableGenreComposer" value="1" />
+			<label for="pref_enableGenreComposer" class="stdlabel">[% "PLUGIN_SETTINGS_GENRE_COMPOSER" | string %]</label>
+		[% END %]
+		[% WRAPPER settingGroup title="PLUGIN_SETTINGS_QOBUZ_FAVORITE" desc="" %]
 			<input type="checkbox" [% IF prefs.pref_enableFavoriteExport %]checked[% END %] class="stdedit" name="pref_enableFavoriteExport" id="pref_enableFavoriteExport" value="1" />
 			<label for="pref_enableFavoriteExport" class="stdlabel">[% "PLUGIN_SETTINGS_FAVORITE_EXPORT" | string %]</label>
 		[% END %]

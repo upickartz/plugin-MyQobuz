@@ -35,6 +35,8 @@ my $qobuz_installed = 0;
 $prefs->init({
 	enableFavoriteImport => 1,
 	enableFavoriteExport => 0,
+	enableGenreComposer => 1,
+	enableComposer =>0,
 	deleteFavoriteAfterImport => 0,
 	enableDBConfig => 0,
 	myQobuzDB => "MyQobuz.db",
@@ -127,11 +129,6 @@ sub handleFeed {
 			image => 'html/images/artists.png',
 		},
 		{
-			name => cstring($client, 'PLUGIN_MY_QOBUZ_COMPOSER'),
-			url  => \&Plugins::MyQobuz::MyQobuzImpl::MyQobuzComposers,
-			image => 'html/images/artists.png',
-		},
-		{
 				name  => cstring($client, 'PLUGIN_MY_QOBUZ_SELECT_TAG'),
 				url  => \&Plugins::MyQobuz::MyQobuzImpl::MyQobuzSelectTag,
 				image => 'plugins/MyQobuz/html/images/tag.png'
@@ -147,7 +144,16 @@ sub handleFeed {
 		# 	image => 'html/images/albums.png',
 		# },
 	];
-
+	# $log->error("Hugo handleFeed() coposer" .  Data::Dump::dump($$prefs->enableComposer));
+	if ( $prefs->enableComposer){
+		splice( @{$items}, 2, 0, 
+		{
+			name => cstring($client, 'PLUGIN_MY_QOBUZ_COMPOSER'),
+			url  => \&Plugins::MyQobuz::MyQobuzImpl::MyQobuzComposers,
+			image => 'html/images/artists.png',
+		}
+		);
+	}
 	if ( $prefs->enableFavoriteImport) {
 		push @{$items} , {
 				name => cstring($client, 'PLUGIN_MY_QOBUZ_IMPORT_FAVORITE_ALBUMS'),

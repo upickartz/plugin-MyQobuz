@@ -96,6 +96,14 @@ PLUGIN_SETTINGS_FAVORITE_EXPORT
 	DE	Aktiviere Export von 'MyQobuz' zu  'Qobuz' Favoriten
 	EN	Enable export from 'MyQobuz' to 'Qobuz' favorites
 
+PLUGIN_SETTINGS_COMPOSER
+	DE	Menu Eintrag 'Meine Komponisten'
+	EN	Menu entry 'My Composers'
+
+PLUGIN_SETTINGS_GENRE_COMPOSER
+	DE	Menu Eintrag 'Meine Komponisten' unterhalb von 'Meine Stilrichtungen/...'
+	EN	Menu entry 'My Composers' below 'My Styles/...'
+
 PLUGIN_SETTINGS_DELETE_FAVORITE
 	DE	Lösche Qobuz Favoriten nach Import
 	EN	Delete Qobuz favorites after import
