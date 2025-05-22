@@ -556,6 +556,7 @@ sub QobuzImportFavorites {
 				for my $album ( @{$favorites->{albums}->{items}} ) {
 					$api->getAlbum(sub {
 						my $album_with_tracks = shift;
+						Plugins::MyQobuz::MyQobuzDB->getInstance()->removeAlbum($album_with_tracks->{id},$album_with_tracks->{artist}->{id});
 						# insert albums to MyQobuz
 						$log->info("QobuzImportFavorites import: $album_with_tracks->{id} , $album_with_tracks->{title}" );
 						Plugins::MyQobuz::MyQobuzDB->getInstance()->insertAlbum($album_with_tracks);

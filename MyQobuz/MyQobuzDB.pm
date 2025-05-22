@@ -373,7 +373,8 @@ sub init {
             album
             INNER JOIN artist ON artist.id = album.artist
         WHERE
-           album.genre = ? ;
+           album.genre = ?
+        ORDER BY artist.name,artist.id; ;
         /;
         $_sth_artists_with_genre = $_dbh->prepare($artistWithGenreSql);
 
@@ -452,7 +453,7 @@ sub init {
         INNER JOIN album_tag ON album.id = album_tag.album 
         INNER JOIN artist ON album.artist = artist.id 
         WHERE album_tag.tag = ? 
-        ORDER BY artist.name;
+         ORDER BY artist.name,artist.id;
         /;
         $_sth_artists_with_tag = $_dbh->prepare($artistWithTagSql);
 
@@ -463,7 +464,7 @@ sub init {
         album.id  
         FROM album  
         INNER JOIN artist ON album.artist = artist.id 
-        ORDER BY artist.name;
+         ORDER BY artist.name,artist.id;
         /;
         $_sth_artists_with_album = $_dbh->prepare($artistWithAlbumSql);
         my $composerWithAlbumSql = q/
@@ -499,7 +500,7 @@ sub init {
         INNER JOIN album_tag ON album.id = album_tag.album 
         INNER JOIN artist ON album.artist = artist.id 
         WHERE album.genre = ? AND album_tag.tag = ?
-        ORDER BY artist.name;
+        ORDER BY artist.name,artist.id;
         /;    
         $_sth_artists_with_genre_tag = $_dbh->prepare($artistWithGenreTagSql);
         1;
