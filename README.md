@@ -7,6 +7,7 @@
 | :-- | :-- | :-- |
 | 1.0.0 | April 29, 2024 |  initial release  |
 | 1.1.0 | May 25, 2024 |  default setting fixed:  'Delete Qobuz favorites after import' = false <br> new feature: export all albums to 'Qobuz' favorites    |
+| 1.2.0 | May 5, 2025 |   solved issue#2 : direct access to albums for "MyQobuz -> last imported" |
 
 
 
