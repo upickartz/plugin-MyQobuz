@@ -84,9 +84,9 @@ require Data::Dump;
     my $_sth_tag_id; 
     my $_sth_tag_with_album;
     my $_sth_albums_with_artist;
-    my $_sth_albums_with_artist_and_genre;
+    # my $_sth_albums_with_artist_and_genre;
     my $_sth_albums_with_artist_and_tag;
-    my $_sth_albums_with_artist_and_genre_and_tag;
+    # my $_sth_albums_with_artist_and_genre_and_tag;
     my $_sth_albums_with_tag;
     my $_sth_albums_with_composer;
     my $_sth_albums_with_composer_and_genre;
@@ -178,6 +178,7 @@ sub createDB {
         /;
         $_dbh->do($trackCreate);
         $_dbh->do('CREATE INDEX index_album ON track (album);');
+        $_dbh->do('CREATE INDEX index_composer ON track (composer);');
         my $tagCreate = q/
         CREATE TABLE tag ( id INTEGER PRIMARY KEY,
                             name TEXT NOT NULL, 
@@ -278,8 +279,8 @@ sub init {
             #only connect to database
             $_dbh = DBI->connect("dbi:SQLite:dbname=$db_path","","",{sqlite_unicode => 1,AutoCommit=>0,RaiseError=>1,HandleError=>\&db_error });    
             if ( ! exist_mig_version("1.3.0") ) {
-            $log->info("init: mig ro 1.3.0 required");
-            Plugins::MyQobuz::MyQobuzMigrate::migrate_1_3_0($_dbh);
+                $log->info("init: mig ro 1.3.0 required");
+                Plugins::MyQobuz::MyQobuzMigrate::migrate_1_3_0($_dbh);
             }  
             #$_dbh->do("PRAGMA foreign_keys = ON");
         }
@@ -366,7 +367,8 @@ sub init {
         my $artistWithGenreSql = q/
         SELECT DISTINCT
             artist.id,
-            artist.name
+            artist.name,
+            album.id
         FROM
             album
             INNER JOIN artist ON artist.id = album.artist
@@ -375,7 +377,7 @@ sub init {
         /;
         $_sth_artists_with_genre = $_dbh->prepare($artistWithGenreSql);
 
-        $_sth_albums_with_artist_and_genre = $_dbh->prepare("SELECT id FROM album WHERE artist = ? AND genre = ?;");
+        # $_sth_albums_with_artist_and_genre = $_dbh->prepare("SELECT id FROM album WHERE artist = ? AND genre = ?;");
 
         my $tagWithAlbumSql= q/
         SELECT
@@ -403,21 +405,21 @@ sub init {
         /;
         $_sth_albums_with_artist_and_tag = $_dbh->prepare($albumWithArtistAndTagSql);
 
-        my $albumWithArtistAndGenreAndTagSql = q/
-        SELECT
-            id,
-            artist,
-            genre,
-            album_tag.tag as album_tag 
-        FROM
-            album
-            INNER JOIN album_tag ON album_tag.album=album.id
-        WHERE
-            artist = ? AND
-            genre = ? AND
-            album_tag = ?;
-        /;
-        $_sth_albums_with_artist_and_genre_and_tag = $_dbh->prepare($albumWithArtistAndGenreAndTagSql);
+        # my $albumWithArtistAndGenreAndTagSql = q/
+        # SELECT
+        #     id,
+        #     artist,
+        #     genre,
+        #     album_tag.tag as album_tag 
+        # FROM
+        #     album
+        #     INNER JOIN album_tag ON album_tag.album=album.id
+        # WHERE
+        #     artist = ? AND
+        #     genre = ? AND
+        #     album_tag = ?;
+        # /;
+        # $_sth_albums_with_artist_and_genre_and_tag = $_dbh->prepare($albumWithArtistAndGenreAndTagSql);
 
         my $allAlbumWithArtist = q/
         SELECT
@@ -444,7 +446,8 @@ sub init {
         my $artistWithTagSql = q/
         SELECT DISTINCT 
         artist.id,
-        artist.name  
+        artist.name,
+        album.id  
         FROM album 
         INNER JOIN album_tag ON album.id = album_tag.album 
         INNER JOIN artist ON album.artist = artist.id 
@@ -456,37 +459,42 @@ sub init {
         my $artistWithAlbumSql = q/
         SELECT DISTINCT 
         artist.id,
-        artist.name  
+        artist.name,
+        album.id  
         FROM album  
         INNER JOIN artist ON album.artist = artist.id 
         ORDER BY artist.name;
         /;
         $_sth_artists_with_album = $_dbh->prepare($artistWithAlbumSql);
         my $composerWithAlbumSql = q/
-            SELECT DISTINCT ar.id, ar.name FROM track as t 
+            SELECT DISTINCT ar.id, ar.name,a.id FROM track as t 
                 INNER JOIN album a on t.album = a.id  
                 INNER JOIN artist as ar on ar.id = t.composer 
-            WHERE t.composer NOT NULL;
+            WHERE t.composer NOT NULL
+            ORDER BY ar.name;
         /;
         $_sth_composer = $_dbh->prepare($composerWithAlbumSql);
 
         my $composerWithGenreSql = q/
         SELECT DISTINCT
             ar.id,
-            ar.name
+            ar.name,
+            a.id
         FROM
             track AS t
             INNER JOIN album AS a ON t.album = a.id
             INNER JOIN artist As ar ON ar.id = t.composer  
         WHERE
-            a.genre = ? ;
+            a.genre = ?
+        ORDER BY ar.name ;
         /;
         $_sth_composer_with_genre = $_dbh->prepare($composerWithGenreSql);
 
         my $artistWithGenreTagSql = q/
         SELECT DISTINCT 
         artist.id,
-        artist.name  
+        artist.name,
+        album.id  
         FROM album 
         INNER JOIN album_tag ON album.id = album_tag.album 
         INNER JOIN artist ON album.artist = artist.id 
@@ -843,42 +851,42 @@ sub getLatestAlbums {
     return \@myAlbums;
 }
 
-sub getAlbums {
-        my $class = shift;
-        my $artistId = shift;
-        my $genreId = shift;
-        my $tag = shift;
-        local $@;
+# sub getAlbums {
+#         my $class = shift;
+#         my $artistId = shift;
+#         my $genreId = shift;
+#         my $tag = shift;
+#         local $@;
         
-        my $albumIds = [];
-        my $listOfList;
-        eval {
-            if (defined $tag){
-                if ( defined $genreId ){
-                   $_sth_albums_with_artist_and_genre_and_tag->execute($artistId,$genreId,$tag);
-                   $listOfList = $_sth_albums_with_artist_and_genre_and_tag->fetchall_arrayref();
-                } else{
-                    $_sth_albums_with_artist_and_tag->execute($artistId,$tag);
-                    $listOfList = $_sth_albums_with_artist_and_tag->fetchall_arrayref();
-                };
-            }else{
-                # no tag defined
-                if ( defined $genreId ){
-                    $_sth_albums_with_artist_and_genre->execute($artistId,$genreId);
-                    $listOfList = $_sth_albums_with_artist_and_genre->fetchall_arrayref();
-                } else{
-                    $_sth_albums_with_artist->execute($artistId);
-                    $listOfList = $_sth_albums_with_artist->fetchall_arrayref();
-                };
-            };
+#         my $albumIds = [];
+#         my $listOfList;
+#         eval {
+#             if (defined $tag){
+#                 if ( defined $genreId ){
+#                    $_sth_albums_with_artist_and_genre_and_tag->execute($artistId,$genreId,$tag);
+#                    $listOfList = $_sth_albums_with_artist_and_genre_and_tag->fetchall_arrayref();
+#                 } else{
+#                     $_sth_albums_with_artist_and_tag->execute($artistId,$tag);
+#                     $listOfList = $_sth_albums_with_artist_and_tag->fetchall_arrayref();
+#                 };
+#             }else{
+#                 # no tag defined
+#                 if ( defined $genreId ){
+#                     $_sth_albums_with_artist_and_genre->execute($artistId,$genreId);
+#                     $listOfList = $_sth_albums_with_artist_and_genre->fetchall_arrayref();
+#                 } else{
+#                     $_sth_albums_with_artist->execute($artistId);
+#                     $listOfList = $_sth_albums_with_artist->fetchall_arrayref();
+#                 };
+#             };
            
-            foreach (@{$listOfList}) { push(@{$albumIds}, $_->[0]) };            
-        };
-        if ($@){
-            $@ && $log->error($@);
-        }
-        return $albumIds;
-}
+#             foreach (@{$listOfList}) { push(@{$albumIds}, $_->[0]) };            
+#         };
+#         if ($@){
+#             $@ && $log->error($@);
+#         }
+#         return $albumIds;
+# }
 
 sub getAlbumsWithTag {
         my $class = shift;
@@ -899,28 +907,28 @@ sub getAlbumsWithTag {
         return $albumIds;
 }
 
-sub getAlbumsWithComposer {
-        my $class = shift;
-        my $composerId = shift;
-        my $genre = shift;
-        local $@;
-        my $albumIds = [];
-        my $listOfList;
-        eval {
-            if (defined $genre){
-                $_sth_albums_with_composer_and_genre->execute($composerId,$genre);
-                $listOfList = $_sth_albums_with_composer_and_genre->fetchall_arrayref();
-            }else{
-                $_sth_albums_with_composer->execute($composerId);
-                $listOfList = $_sth_albums_with_composer->fetchall_arrayref();            
-            };
-            foreach (@{$listOfList}) { push(@{$albumIds}, $_->[0]) };
-        };
-        if ($@){
-            $@ && $log->error($@);
-        }
-        return $albumIds;
-}
+# sub getAlbumsWithComposer {
+#         my $class = shift;
+#         my $composerId = shift;
+#         my $genre = shift;
+#         local $@;
+#         my $albumIds = [];
+#         my $listOfList;
+#         eval {
+#             if (defined $genre){
+#                 $_sth_albums_with_composer_and_genre->execute($composerId,$genre);
+#                 $listOfList = $_sth_albums_with_composer_and_genre->fetchall_arrayref();
+#             }else{
+#                 $_sth_albums_with_composer->execute($composerId);
+#                 $listOfList = $_sth_albums_with_composer->fetchall_arrayref();            
+#             };
+#             foreach (@{$listOfList}) { push(@{$albumIds}, $_->[0]) };
+#         };
+#         if ($@){
+#             $@ && $log->error($@);
+#         }
+#         return $albumIds;
+# }
 
 
 sub getTags {
@@ -988,11 +996,14 @@ sub getComposers {
             $_sth_composer->execute();
             $listOfComposers = $_sth_composer->fetchall_arrayref();
         }
-        
+        my $composer = undef; 
         foreach (@{$listOfComposers}) { 
-                my $hash = { id => $_->[0] , name =>  $_->[1] }; 
-                push ( @{$composers} , $hash); 
-            };
+                if ($composer->{id} != $_->[0]){
+                    $composer = {id => $_->[0] , name =>  $_->[1], albums => []};
+                    push ( @{$composers} , $composer);
+                }
+                push ( @{$composer->{albums}},$_->[2]);
+        };
     };
     if ($@){
         $@ && $log->error($@);
@@ -1018,12 +1029,14 @@ sub getArtists {
                 $_sth_artists_with_album->execute();
                 $listOfArtists = $_sth_artists_with_album->fetchall_arrayref();
             }
-
+            my $artist = undef; 
             foreach (@{$listOfArtists}) { 
-                my $hash = { id => $_->[0] , name =>  $_->[1] }; 
-                push ( @{$artists} , $hash); 
-            };
-                 
+                if ($artist->{id} != $_->[0]){
+                    $artist = {id => $_->[0] , name =>  $_->[1], albums => []};
+                    push ( @{$artists} , $artist);
+                }
+                push ( @{$artist->{albums}},$_->[2]);
+            };               
         };
         if ($@){
             $@ && $log->error($@);
@@ -1048,10 +1061,13 @@ sub getArtistsWithGenre {
                 $_sth_artists_with_genre->execute($genre);
                 $listOfArtists = $_sth_artists_with_genre->fetchall_arrayref();
             }
-           
-            foreach (@{$listOfArtists}) {  
-                my $hash = { id => $_->[0] , name =>  $_->[1] }; 
-                push(@{$artists}, $hash ) 
+            my $artist = undef; 
+            foreach (@{$listOfArtists}) { 
+                if ($artist->{id} != $_->[0]){
+                    $artist = {id => $_->[0] , name =>  $_->[1], albums => []};
+                    push ( @{$artists} , $artist);
+                }
+                push ( @{$artist->{albums}},$_->[2]);
             };
         };
         if ($@){

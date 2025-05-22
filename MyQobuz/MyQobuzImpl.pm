@@ -25,6 +25,7 @@ use Slim::Utils::Prefs;
 use Slim::Utils::Log;
 
 use Plugins::MyQobuz::MyQobuzDB;
+# use Benchmark;
 
 # require Data::Dump;
  
@@ -178,21 +179,23 @@ sub MyQobuzArtist {
 
 	}, $artistId);
 }
-	
+
 sub MyQobuzComposers {
 	my ($client, $cb, $params, $args) = @_;
 	my $genre = $args->{genre};
+	# my $timeComposers1 = new Benchmark;
 	my $composers = Plugins::MyQobuz::MyQobuzDB->getInstance()->getComposers($genre);
+	# my $timeComposers2 = new Benchmark;
+	# my $duration = timediff($timeComposers2,$timeComposers2);
+	# $log->error("Hugo Bench  timeComposers " .  Data::Dump::dump(timestr($duration)));
+	# my $timeAlbums1 = new Benchmark;
 	my @myComposers;
-	foreach my $composer ( sort {
-			Slim::Utils::Text::ignoreCaseArticles($a->{name}) cmp Slim::Utils::Text::ignoreCaseArticles($b->{name})
-		}
-		@$composers) {
-		my $composertId = $composer->{id};
-		my $composertName = $composer->{name};
-		my $albumFilter = Plugins::MyQobuz::MyQobuzDB->getInstance()->getAlbumsWithComposer($composertId,$genre); 
-		push @myComposers, _myArtistItem($client, $composertId, $composertName, $albumFilter,1);
+	foreach my $composer (@$composers) {
+		# my $albumFilter = Plugins::MyQobuz::MyQobuzDB->getInstance()->getAlbumsWithComposer($composertId,$genre); 
+		push @myComposers, _myArtistItem($client, $composer->{id}, $composer->{name}, $composer->{albums},1);
 	};
+	# my $timeAlbums2 = new Benchmark;
+	# $log->error("Hugo Bench  timeAlbums " .  Data::Dump::dump(timestr(timediff($timeAlbums2,$timeAlbums1))));
 	$cb->({
 			items => \@myComposers
 		});
@@ -213,7 +216,7 @@ sub MyQobuzArtists {
 		@$artists) {
 		my $artistId = $artist->{id};
 		my $artistName = $artist->{name};
-		my $albumFilter = Plugins::MyQobuz::MyQobuzDB->getInstance()->getAlbums($artistId,undef,$tagId);
+		my $albumFilter = $artist->{album};
 		push @myArtists, _myArtistItem($client, $artistId, $artistName, $albumFilter);
 	};
 	$cb->({
@@ -240,12 +243,11 @@ sub MyQobuzGenre {
 		};
 	}
 	my $artists = Plugins::MyQobuz::MyQobuzDB->getInstance()->getArtistsWithGenre($genre,$tagId);
-	foreach my $artist (sort {
-			Slim::Utils::Text::ignoreCaseArticles($a->{name}) cmp Slim::Utils::Text::ignoreCaseArticles($b->{name})
-		} @$artists) {
+	foreach my $artist (@{$artists}) {
 		my $artistId = $artist->{id};
 		my $artistName = $artist->{name};
-		my $albumFilter = Plugins::MyQobuz::MyQobuzDB->getInstance()->getAlbums($artistId,$genre,$tagId);
+		# my $albumFilter = Plugins::MyQobuz::MyQobuzDB->getInstance()->getAlbums($artistId,$genre,$tagId);
+		my $albumFilter = $artist->{albums};
 		push @myArtists, _myArtistItem($client, $artistId, $artistName, $albumFilter);
 	};
 			
@@ -406,6 +408,7 @@ sub _myArtistItem {
 		url   => \&MyQobuzArtist,
 		passthrough => [{
 			artistId  => $artistId,
+			artistName =>  $artistName,
 			myQobuzAlbumFilter => $myQobuzAlbumFilter,
 			isComposer => $isComposer
 		}],

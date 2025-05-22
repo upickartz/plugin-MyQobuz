@@ -63,6 +63,7 @@ sub migrate_1_3_0 {
         #change track 
         $_dbh->do("ALTER TABLE track add column  composer INTEGER DEFAULT NULL ;");
         $_dbh->do("ALTER TABLE track add column  performers TEXT DEFAULT NULL ;");
+        $_dbh->do("CREATE INDEX index_composer ON track (composer);");
         # to store album artist relation
         $_dbh->do("CREATE TABLE IF NOT EXISTS artist_album (artist INTEGER,album TEXT,role TEXT,PRIMARY KEY (artist,album));");
         $_dbh->do("CREATE INDEX index_artist_album_artist ON artist_album (artist);");
