@@ -289,9 +289,9 @@ sub init {
         #artist
         $_sth_insert_artist = $_dbh->prepare("INSERT INTO artist (id,name,image) VALUES (?, ?, ?);");
         #album
-        $_sth_insert_album = $_dbh->prepare("INSERT INTO album (id,name,genre, qobuzGenre, image, artist, year, label) VALUES (?, ?, ?, ?, ?, ?, ?, ?);");
+        $_sth_insert_album = $_dbh->prepare("REPLACE INTO album (id,name,genre, qobuzGenre, image, artist, year, label) VALUES (?, ?, ?, ?, ?, ?, ?, ?);");
         #track
-        $_sth_insert_track = $_dbh->prepare("INSERT INTO track (id,no,name,duration,url,album,composer,performers, exclude) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);");
+        $_sth_insert_track = $_dbh->prepare("REPLACE INTO track (id,no,name,duration,url,album,composer,performers, exclude) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);");
         #tag
         $_sth_insert_tag = $_dbh->prepare("INSERT INTO tag (name) VALUES (?);");
         #tag
