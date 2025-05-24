@@ -44,6 +44,7 @@ sub MyQobuzGenres {
 	my ($client, $cb, $params, $args) = @_;
 
 	my $tagId = $args->{tagId};
+	my $no_composer = $args->{no_composer};
 
 	$log->info("MyQobuzImpl::MyQobuzGenres  called with tagId:  $tagId .");
 	my $myGenres = Plugins::MyQobuz::MyQobuzDB->getInstance()->getMyGenres($tagId);
@@ -56,7 +57,8 @@ sub MyQobuzGenres {
 				url  => \&MyQobuzGenre,
 				passthrough => [{
 					genre => $_->[0],
-					tagId => $tagId
+					tagId => $tagId,
+					no_composer => $no_composer
 				}]
 			};
 		push @$items, $item;
@@ -229,10 +231,12 @@ sub MyQobuzGenre {
 	my ($client, $cb, $params, $args) = @_;
 	my $genre = $args->{genre} || '';
 	my $tagId = $args->{tagId};
+	my $no_composer = $args->{no_composer};
 	$log->info("MyQobuzImpl::MyQobuzGenre  called with tagId:  $tagId and genre:  $genre .");
 	
 	my @myArtists;
-	if ($prefs->enableGenreComposer){
+	# no compoer for tag access via genre
+	if ($prefs->enableGenreComposer && !$no_composer){
 			push @myArtists, {
 			name => cstring($client, 'PLUGIN_MY_QOBUZ_COMPOSER'),
 			url  => \&Plugins::MyQobuz::MyQobuzImpl::MyQobuzComposers,
@@ -275,7 +279,8 @@ sub MyQobuzWithTag {
 			name => cstring($client, 'PLUGIN_MY_QOBUZ_GENRE'),
 			url  => \&MyQobuzGenres,
 			passthrough => [{
-					tagId => $tagId
+					tagId => $tagId,
+					no_composer => 1
 			}],
 		},
 		{
