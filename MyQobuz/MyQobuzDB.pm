@@ -453,7 +453,7 @@ sub init {
         INNER JOIN album_tag ON album.id = album_tag.album 
         INNER JOIN artist ON album.artist = artist.id 
         WHERE album_tag.tag = ? 
-         ORDER BY artist.name,artist.id;
+        ORDER BY artist.name,artist.id;
         /;
         $_sth_artists_with_tag = $_dbh->prepare($artistWithTagSql);
 
@@ -464,7 +464,7 @@ sub init {
         album.id  
         FROM album  
         INNER JOIN artist ON album.artist = artist.id 
-         ORDER BY artist.name,artist.id;
+        ORDER BY artist.name,artist.id;
         /;
         $_sth_artists_with_album = $_dbh->prepare($artistWithAlbumSql);
         my $composerWithAlbumSql = q/
@@ -1016,9 +1016,8 @@ sub getComposers {
 # returns list of artist hashes with id and name
 sub getArtists {
         my $class = shift;
-
         my $tagId = shift;
-       
+
         local $@;
         my $artists = [];
         eval {

@@ -212,13 +212,11 @@ sub MyQobuzArtists {
 	$log->info("MyQobuzImpl::MyQobuzArtists  called with tagId:  $tagId .");
 	my $artists = Plugins::MyQobuz::MyQobuzDB->getInstance()->getArtists($tagId);
 	my @myArtists;
-	foreach my $artist ( sort {
-			Slim::Utils::Text::ignoreCaseArticles($a->{name}) cmp Slim::Utils::Text::ignoreCaseArticles($b->{name})
-		}
-		@$artists) {
+	
+	foreach my $artist (@$artists) {
 		my $artistId = $artist->{id};
 		my $artistName = $artist->{name};
-		my $albumFilter = $artist->{album};
+		my $albumFilter = $artist->{albums};
 		push @myArtists, _myArtistItem($client, $artistId, $artistName, $albumFilter);
 	};
 	$cb->({
