@@ -676,10 +676,11 @@ sub insertAlbum {
             }
             # insert tracks
             foreach my $track (@{$album->{tracks}->{items}}) {
-                my $composerId = undef;
-                if ($track->{composer}){
-                    $composerId = $track->{composer}->{id};                    
-                    _insertArtist($class,$composerId,$track->{composer}->{name});
+                my $composerId = $track->{composer}->{id}; 
+                my $composerName = $track->{composer}->{name};
+                if ( defined $composerName){
+                    # $log->error("Hugo insertAlbum  composer   " .  Data::Dump::dump($track->{id}));                 
+                    _insertArtist($class,$composerId,$composerName);
                 }
                 #(id,no,name,duration,url,album,composer,performers, exclude)
                 my $url = Plugins::Qobuz::API::Common->getUrl(undef,$track);
