@@ -1,13 +1,12 @@
 # plugin-MyQobuz
 
 ## Release Notes
-
-
 |  Version  | Release Date | Notes |
 | :-- | :-- | :-- |
 | 1.0.0 | April 29, 2024 |  initial release  |
 | 1.1.0 | May 25, 2024 |  default setting fixed:  'Delete Qobuz favorites after import' = false <br> new feature: export all albums to 'Qobuz' favorites    |
 | 1.2.0 | May 5, 2025 |   solved issue#2 : direct access to albums for "MyQobuz -> last imported" |
+| 1.3.0 | Jul 25, 2025 |   solved issue#3:  direct access to albums for "MyQobuz ->MyTags -> ???" <br> support for navigating via composer (only for new added albums) / db change will be done automatically | 
 
 
 
