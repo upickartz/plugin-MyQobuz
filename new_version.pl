@@ -61,6 +61,7 @@ sub create_zip {
     $zipa->add("MyQobuz/MyQobuzImpl.pm");
     $zipa->add("MyQobuz/Plugin.pm");
     $zipa->add("MyQobuz/MyQobuzDB.pm");
+    $zipa->add("MyQobuz/MyQobuzMigrate.pm");
     $zipa->add("MyQobuz/Settings.pm");
     $zipa->add("MyQobuz/strings.txt");
     $zipa->add("MyQobuz/HTML/EN/plugins/MyQobuz/html/images/icon.png");
